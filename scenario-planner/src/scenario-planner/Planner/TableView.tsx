@@ -17,6 +17,21 @@ import { ExpandMore, ExpandLess } from "@mui/icons-material";
 import mockData from "../mockData";
 import "./TableView.css";
 
+// Common styles
+const headerCellStyles = {
+  backgroundColor: "#1976d2", // MUI blue
+  color: "white",
+  fontWeight: "bold",
+  whiteSpace: "nowrap",
+};
+
+const bodyCellStyles = {
+  whiteSpace: "nowrap",
+  padding: "6px 8px",
+  fontSize: "0.9rem",
+  color: "#555",
+};
+
 interface MockDataItem {
   mfr: string;
   cust: string;
@@ -74,21 +89,53 @@ const TableView = () => {
         }, {} as Record<string, MockDataItem[]>)
       : {};
 
+  const calculateAggregates = (items: MockDataItem[]) => {
+    const totalPacks = items.reduce(
+      (sum, item) => sum + item["AvgBaseVolume(Packs)"],
+      0
+    );
+    const totalPieces = items.reduce(
+      (sum, item) => sum + item["AvgBaseVolume(Piece)"],
+      0
+    );
+    const totalPredictedVolume = items.reduce(
+      (sum, item) => sum + item["predicted volume per week"],
+      0
+    );
+    const totalUplifts = items.reduce(
+      (sum, item) => sum + item["uplifts vs base"],
+      0
+    );
+
+    return {
+      totalPacks,
+      totalPieces,
+      totalPredictedVolume,
+      totalUplifts,
+    };
+  };
+
   const renderRow = (item: MockDataItem, level: number) => (
     <TableRow key={item.pid} className="table-row">
-      <TableCell className="table-cell blank-cell" colSpan={level}></TableCell>
-      <TableCell className="table-cell">{item.ppg}</TableCell>
-      <TableCell className="table-cell">{item.priceperpack}</TableCell>
-      <TableCell className="table-cell">{item.priceperpiece}</TableCell>
-      <TableCell className="table-cell">{item["AvgBaseVolume(Packs)"]}</TableCell>
-      <TableCell className="table-cell">{item["AvgBaseVolume(Piece)"]}</TableCell>
-      <TableCell className="table-cell">{item.PromoPeriod}</TableCell>
-      <TableCell className="table-cell">{item.PromoPrice}</TableCell>
-      <TableCell className="table-cell">{item.RetailersMargin}</TableCell>
-      <TableCell className="table-cell">
+      {groupBy !== "ppg" && (
+        <TableCell sx={{ ...bodyCellStyles }} colSpan={level}></TableCell>
+      )}
+      <TableCell sx={{ ...bodyCellStyles }}>{item.ppg}</TableCell>
+      <TableCell sx={{ ...bodyCellStyles }}>{item.priceperpack}</TableCell>
+      <TableCell sx={{ ...bodyCellStyles }}>{item.priceperpiece}</TableCell>
+      <TableCell sx={{ ...bodyCellStyles }}>
+        {item["AvgBaseVolume(Packs)"]}
+      </TableCell>
+      <TableCell sx={{ ...bodyCellStyles }}>
+        {item["AvgBaseVolume(Piece)"]}
+      </TableCell>
+      <TableCell sx={{ ...bodyCellStyles }}>{item.PromoPeriod}</TableCell>
+      <TableCell sx={{ ...bodyCellStyles }}>{item.PromoPrice}</TableCell>
+      <TableCell sx={{ ...bodyCellStyles }}>{item.RetailersMargin}</TableCell>
+      <TableCell sx={{ ...bodyCellStyles }}>
         {item["predicted volume per week"]}
       </TableCell>
-      <TableCell className="table-cell">{item["uplifts vs base"]}</TableCell>
+      <TableCell sx={{ ...bodyCellStyles }}>{item["uplifts vs base"]}</TableCell>
     </TableRow>
   );
 
@@ -117,55 +164,99 @@ const TableView = () => {
             <TableRow>
               {groupBy !== "ppg" && (
                 <TableCell
-                  className="table-header blank-header"
-                  colSpan={1}
+                  sx={{ ...headerCellStyles }}
+                  colSpan={groupBy === "subBrd" ? 1 : 2}
                 ></TableCell>
               )}
-              <TableCell className="table-header">PPG</TableCell>
-              <TableCell className="table-header">Price Per Pack</TableCell>
-              <TableCell className="table-header">Price Per Piece</TableCell>
-              <TableCell className="table-header">AvgBaseVolume (Packs)</TableCell>
-              <TableCell className="table-header">AvgBaseVolume (Piece)</TableCell>
-              <TableCell className="table-header">Promo Period</TableCell>
-              <TableCell className="table-header">Promo Price</TableCell>
-              <TableCell className="table-header">Retailers Margin</TableCell>
-              <TableCell className="table-header">Predicted Volume/Week</TableCell>
-              <TableCell className="table-header">Uplifts vs Base</TableCell>
+              <TableCell sx={{ ...headerCellStyles }}>PPG</TableCell>
+              <TableCell sx={{ ...headerCellStyles }}>Price Per Pack</TableCell>
+              <TableCell sx={{ ...headerCellStyles }}>Price Per Piece</TableCell>
+              <TableCell sx={{ ...headerCellStyles }}>
+                AvgBaseVolume (Packs)
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyles }}>
+                AvgBaseVolume (Piece)
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyles }}>Promo Period</TableCell>
+              <TableCell sx={{ ...headerCellStyles }}>Promo Price</TableCell>
+              <TableCell sx={{ ...headerCellStyles }}>Retailers Margin</TableCell>
+              <TableCell sx={{ ...headerCellStyles }}>
+                Predicted Volume/Week
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyles }}>Uplifts vs Base</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {groupBy === "ppg"
               ? mockData.map((item) => renderRow(item, 0))
               : groupBy === "subBrd"
-              ? Object.entries(groupedData).map(([subGroup, items]) => (
-                  <React.Fragment key={subGroup}>
-                    <TableRow className="group-row">
-                      <TableCell
-                        colSpan={11}
-                        className="group-header"
-                        style={{ paddingLeft: "16px" }}
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={() => toggleGroup(subGroup)}
+              ? Object.entries(groupedData).map(([subGroup, items]) => {
+                  const aggregates = calculateAggregates(items as MockDataItem[]);
+                  return (
+                    <React.Fragment key={subGroup}>
+                      <TableRow className="group-row">
+                        <TableCell
+                          colSpan={1}
+                          className="group-header"
+                          style={{ paddingLeft: "16px" }}
                         >
-                          {expandedGroups[subGroup] ? (
-                            <ExpandLess />
-                          ) : (
-                            <ExpandMore />
-                          )}
-                        </IconButton>
-                        {subGroup}
-                      </TableCell>
-                    </TableRow>
-                    {expandedGroups[subGroup] &&
-                      (items as MockDataItem[]).map((item) => renderRow(item, 1))}
-                  </React.Fragment>
-                ))
+                          <IconButton
+                            size="small"
+                            onClick={() => toggleGroup(subGroup)}
+                          >
+                            {expandedGroups[subGroup] ? (
+                              <ExpandLess />
+                            ) : (
+                              <ExpandMore />
+                            )}
+                          </IconButton>
+                          {subGroup}
+                        </TableCell>
+                        <TableCell sx={{ ...bodyCellStyles }}>
+                          <Typography
+                            sx={{ fontSize: "12px" }}
+                            color="textSecondary"
+                          >
+                            ({items.length})
+                          </Typography>
+                        </TableCell>
+                        <TableCell sx={{ ...bodyCellStyles }}>
+                          {/* Empty for Price Per Pack */}
+                        </TableCell>
+                        <TableCell sx={{ ...bodyCellStyles }}>
+                          {/* Empty for Price Per Piece */}
+                        </TableCell>
+                        <TableCell sx={{ ...bodyCellStyles }}>
+                          {aggregates.totalPacks}
+                        </TableCell>
+                        <TableCell sx={{ ...bodyCellStyles }}>
+                          {aggregates.totalPieces}
+                        </TableCell>
+                        <TableCell sx={{ ...bodyCellStyles }}>
+                          {/* Empty for Promo Period */}
+                        </TableCell>
+                        <TableCell sx={{ ...bodyCellStyles }}>
+                          {/* Empty for Promo Price */}
+                        </TableCell>
+                        <TableCell sx={{ ...bodyCellStyles }}>
+                          {/* Empty for Retailers Margin */}
+                        </TableCell>
+                        <TableCell sx={{ ...bodyCellStyles }}>
+                          {aggregates.totalPredictedVolume}
+                        </TableCell>
+                        <TableCell sx={{ ...bodyCellStyles }}>
+                          {aggregates.totalUplifts}
+                        </TableCell>
+                      </TableRow>
+                      {expandedGroups[subGroup] &&
+                        (items as MockDataItem[]).map((item) => renderRow(item, 1))}
+                    </React.Fragment>
+                  );
+                })
               : Object.entries(groupedData).map(([brand, subGroups]) => (
                   <React.Fragment key={brand}>
                     <TableRow className="group-row">
-                      <TableCell colSpan={11} className="group-header">
+                      <TableCell colSpan={12} className="group-header">
                         <IconButton size="small" onClick={() => toggleGroup(brand)}>
                           {expandedGroups[brand] ? <ExpandLess /> : <ExpandMore />}
                         </IconButton>
@@ -173,33 +264,75 @@ const TableView = () => {
                       </TableCell>
                     </TableRow>
                     {expandedGroups[brand] &&
-                      Object.entries(subGroups).map(([subGroup, items]) => (
-                        <React.Fragment key={subGroup}>
-                          <TableRow className="subgroup-row">
-                            <TableCell
-                              colSpan={11}
-                              className="subgroup-header"
-                              style={{ paddingLeft: "32px" }}
-                            >
-                              <IconButton
-                                size="small"
-                                onClick={() => toggleSubGroup(subGroup)}
+                      Object.entries(
+                        subGroups as Record<string, MockDataItem[]>
+                      ).map(([subGroup, items]) => {
+                        const aggregates = calculateAggregates(
+                          items as MockDataItem[]
+                        );
+                        return (
+                          <React.Fragment key={subGroup}>
+                            <TableRow className="subgroup-row">
+                              <TableCell
+                                colSpan={2} // Adjusted colSpan to align with the Brand level
+                                className="subgroup-header"
+                                style={{ paddingLeft: "32px" }}
                               >
-                                {expandedSubGroups[subGroup] ? (
-                                  <ExpandLess />
-                                ) : (
-                                  <ExpandMore />
-                                )}
-                              </IconButton>
-                              {subGroup}
-                            </TableCell>
-                          </TableRow>
-                          {expandedSubGroups[subGroup] &&
-                            (items as MockDataItem[]).map((item) =>
-                              renderRow(item, 2)
-                            )}
-                        </React.Fragment>
-                      ))}
+                                <IconButton
+                                  size="small"
+                                  onClick={() => toggleSubGroup(subGroup)}
+                                >
+                                  {expandedSubGroups[subGroup] ? (
+                                    <ExpandLess />
+                                  ) : (
+                                    <ExpandMore />
+                                  )}
+                                </IconButton>
+                                {subGroup}
+                              </TableCell>
+                              <TableCell sx={{ ...bodyCellStyles }}>
+                                <Typography
+                                  sx={{ fontSize: "12px" }}
+                                  color="textSecondary"
+                                >
+                                  ({items.length})
+                                </Typography>
+                              </TableCell>
+                              <TableCell sx={{ ...bodyCellStyles }}>
+                                {/* Empty for Price Per Pack */}
+                              </TableCell>
+                              <TableCell sx={{ ...bodyCellStyles }}>
+                                {/* Empty for Price Per Piece */}
+                              </TableCell>
+                              <TableCell sx={{ ...bodyCellStyles }}>
+                                {aggregates.totalPacks}
+                              </TableCell>
+                              <TableCell sx={{ ...bodyCellStyles }}>
+                                {aggregates.totalPieces}
+                              </TableCell>
+                              <TableCell sx={{ ...bodyCellStyles }}>
+                                {/* Empty for Promo Period */}
+                              </TableCell>
+                              <TableCell sx={{ ...bodyCellStyles }}>
+                                {/* Empty for Promo Price */}
+                              </TableCell>
+                              <TableCell sx={{ ...bodyCellStyles }}>
+                                {/* Empty for Retailers Margin */}
+                              </TableCell>
+                              <TableCell sx={{ ...bodyCellStyles }}>
+                                {aggregates.totalPredictedVolume}
+                              </TableCell>
+                              <TableCell sx={{ ...bodyCellStyles }}>
+                                {aggregates.totalUplifts}
+                              </TableCell>
+                            </TableRow>
+                            {expandedSubGroups[subGroup] &&
+                              (items as MockDataItem[]).map((item) =>
+                                renderRow(item, 2)
+                              )}
+                          </React.Fragment>
+                        );
+                      })}
                   </React.Fragment>
                 ))}
           </TableBody>
