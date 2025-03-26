@@ -2,14 +2,21 @@ import { createTheme } from "@mui/material";
 
 export const getDesignTokens = () => ({
   typography: {
-    fontFamily: "'Lato', sans-serif",
+    h6: {
+      fontSize: "1rem",
+      fontWeight: 400,
+    },
+    h4: {
+      fontSize: "1.5rem",
+      fontWeight: 600,
+    },
   },
   palette: {
     primary: {
-      main: "#092acd",
+      main: "rgb(217, 23, 228)",
     },
     secondary: {
-      main: "#9c27b0",
+      main: "#000000",
     },
     background: {
       default: "#f5f5f5",
