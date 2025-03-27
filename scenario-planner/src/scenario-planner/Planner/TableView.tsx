@@ -7,8 +7,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  TextField,
-  MenuItem,
   Typography,
   Box,
   IconButton,
@@ -19,17 +17,20 @@ import "./TableView.css";
 
 // Common styles
 const headerCellStyles = {
-  backgroundColor: "#1976d2", // MUI blue
-  color: "white",
+  backgroundColor: "#fff", // MUI blue
+  color: "gray",
   fontWeight: "bold",
+  fontSize: "0.8rem",
   whiteSpace: "nowrap",
 };
 
 const bodyCellStyles = {
   whiteSpace: "nowrap",
-  padding: "6px 8px",
+  padding: "6px 20px",
   fontSize: "0.9rem",
   color: "#555",
+  borderRight: "1px solid #ddd",
+  fontWeight: "600",
 };
 
 interface MockDataItem {
@@ -52,17 +53,32 @@ interface MockDataItem {
   "uplifts vs base": number;
 }
 
-const TableView = () => {
-  const [groupBy, setGroupBy] = useState("brd"); // Default grouping by Brand
+interface TableViewProps {
+  level: "Brand" | "SubBrand" | "PPG";
+}
+
+const TableView: React.FC<TableViewProps> = ({ level }) => {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [expandedSubGroups, setExpandedSubGroups] = useState<
     Record<string, boolean>
   >({});
+  const [visibleColumns, setVisibleColumns] = useState({
+    ppg: true,
+    pricePerPack: true,
+    pricePerPiece: true,
+    avgBaseVolumePacks: true,
+    avgBaseVolumePiece: true,
+    promoPrice: true,
+    retailersMargin: true,
+    predictedVolume: true,
+    uplifts: true,
+  });
 
-  const handleGroupChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setGroupBy(event.target.value);
-    setExpandedGroups({});
-    setExpandedSubGroups({});
+  const toggleColumnVisibility = (column: keyof typeof visibleColumns) => {
+    setVisibleColumns((prev) => ({
+      ...prev,
+      [column]: !prev[column],
+    }));
   };
 
   const toggleGroup = (group: string) => {
@@ -74,20 +90,20 @@ const TableView = () => {
   };
 
   const groupedData =
-    groupBy === "brd"
+    level === "Brand"
       ? mockData.reduce((acc, item) => {
           if (!acc[item.brd]) acc[item.brd] = {};
           if (!acc[item.brd][item.subBrd]) acc[item.brd][item.subBrd] = [];
           acc[item.brd][item.subBrd].push(item);
           return acc;
         }, {} as Record<string, Record<string, MockDataItem[]>>)
-      : groupBy === "subBrd"
+      : level === "SubBrand"
       ? mockData.reduce((acc, item) => {
           if (!acc[item.subBrd]) acc[item.subBrd] = [];
           acc[item.subBrd].push(item);
           return acc;
         }, {} as Record<string, MockDataItem[]>)
-      : {};
+      : mockData;
 
   const calculateAggregates = (items: MockDataItem[]) => {
     const totalPacks = items.reduce(
@@ -117,25 +133,54 @@ const TableView = () => {
 
   const renderRow = (item: MockDataItem, level: number) => (
     <TableRow key={item.pid} className="table-row">
-      {groupBy !== "ppg" && (
+      {level !== 0 && (
         <TableCell sx={{ ...bodyCellStyles }} colSpan={level}></TableCell>
       )}
-      <TableCell sx={{ ...bodyCellStyles }}>{item.ppg}</TableCell>
-      <TableCell sx={{ ...bodyCellStyles }}>{item.priceperpack}</TableCell>
-      <TableCell sx={{ ...bodyCellStyles }}>{item.priceperpiece}</TableCell>
-      <TableCell sx={{ ...bodyCellStyles }}>
-        {item["AvgBaseVolume(Packs)"]}
-      </TableCell>
-      <TableCell sx={{ ...bodyCellStyles }}>
-        {item["AvgBaseVolume(Piece)"]}
-      </TableCell>
-      <TableCell sx={{ ...bodyCellStyles }}>{item.PromoPeriod}</TableCell>
-      <TableCell sx={{ ...bodyCellStyles }}>{item.PromoPrice}</TableCell>
-      <TableCell sx={{ ...bodyCellStyles }}>{item.RetailersMargin}</TableCell>
-      <TableCell sx={{ ...bodyCellStyles }}>
-        {item["predicted volume per week"]}
-      </TableCell>
-      <TableCell sx={{ ...bodyCellStyles }}>{item["uplifts vs base"]}</TableCell>
+      {visibleColumns.ppg && (
+        <TableCell sx={{ ...bodyCellStyles, textAlign: "left" }}>
+          {item.ppg}
+        </TableCell>
+      )}
+      {visibleColumns.pricePerPack && (
+        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+          £{item.priceperpack}
+        </TableCell>
+      )}
+      {visibleColumns.pricePerPiece && (
+        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+          £{item.priceperpiece}
+        </TableCell>
+      )}
+      {visibleColumns.avgBaseVolumePacks && (
+        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+          {item["AvgBaseVolume(Packs)"]}
+        </TableCell>
+      )}
+      {visibleColumns.avgBaseVolumePiece && (
+        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+          {item["AvgBaseVolume(Piece)"]}
+        </TableCell>
+      )}
+      {visibleColumns.promoPrice && (
+        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+          £{item.PromoPrice}
+        </TableCell>
+      )}
+      {visibleColumns.retailersMargin && (
+        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+          {item.RetailersMargin}%
+        </TableCell>
+      )}
+      {visibleColumns.predictedVolume && (
+        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+          {item["predicted volume per week"]}
+        </TableCell>
+      )}
+      {visibleColumns.uplifts && (
+        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+          {item["uplifts vs base"]}
+        </TableCell>
+      )}
     </TableRow>
   );
 
@@ -144,52 +189,115 @@ const TableView = () => {
       <Typography variant="h5" className="table-title">
         Scenario Planner Table
       </Typography>
-      <TextField
-        select
-        label="Group By"
-        value={groupBy}
-        onChange={handleGroupChange}
-        variant="outlined"
-        className="group-by-dropdown"
-        size="small"
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          marginBottom: "8px",
+          borderBottom: "1px solid #ddd",
+          paddingBottom: "8px",
+        }}
       >
-        <MenuItem value="brd">Brand</MenuItem>
-        <MenuItem value="subBrd">SubBrand</MenuItem>
-        <MenuItem value="ppg">PPG</MenuItem>
-      </TextField>
-
+        <Box
+          sx={{
+            display: "flex",
+            gap: "8px",
+            backgroundColor: "#fff",
+            borderRadius: "4px",
+            padding: "4px 8px",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          {Object.keys(visibleColumns).map((column) => (
+            <button
+              key={column}
+              onClick={() =>
+                toggleColumnVisibility(column as keyof typeof visibleColumns)
+              }
+              style={{
+                border: "none",
+                background: visibleColumns[column as keyof typeof visibleColumns]
+                  ? "#1976d2"
+                  : "#e0e0e0",
+                color: visibleColumns[column as keyof typeof visibleColumns]
+                  ? "#fff"
+                  : "#000",
+                padding: "4px 8px",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontSize: "0.8rem",
+              }}
+            >
+              {column}
+            </button>
+          ))}
+        </Box>
+      </Box>
       <TableContainer component={Paper} className="table-container">
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
-              {groupBy !== "ppg" && (
+              {level !== "PPG" && (
                 <TableCell
-                  sx={{ ...headerCellStyles }}
-                  colSpan={groupBy === "subBrd" ? 1 : 2}
+                  sx={{
+                    ...headerCellStyles,
+                    padding: "6px 8px", // Adjusted padding to remove gaps
+                  }}
+                  colSpan={level === "SubBrand" ? 1 : 2}
                 ></TableCell>
               )}
-              <TableCell sx={{ ...headerCellStyles }}>PPG</TableCell>
-              <TableCell sx={{ ...headerCellStyles }}>Price Per Pack</TableCell>
-              <TableCell sx={{ ...headerCellStyles }}>Price Per Piece</TableCell>
-              <TableCell sx={{ ...headerCellStyles }}>
-                AvgBaseVolume (Packs)
-              </TableCell>
-              <TableCell sx={{ ...headerCellStyles }}>
-                AvgBaseVolume (Piece)
-              </TableCell>
-              <TableCell sx={{ ...headerCellStyles }}>Promo Period</TableCell>
-              <TableCell sx={{ ...headerCellStyles }}>Promo Price</TableCell>
-              <TableCell sx={{ ...headerCellStyles }}>Retailers Margin</TableCell>
-              <TableCell sx={{ ...headerCellStyles }}>
-                Predicted Volume/Week
-              </TableCell>
-              <TableCell sx={{ ...headerCellStyles }}>Uplifts vs Base</TableCell>
+              {visibleColumns.ppg && (
+                <TableCell sx={{ ...headerCellStyles, textAlign: "left" }}>
+                  PPG
+                </TableCell>
+              )}
+              {visibleColumns.pricePerPack && (
+                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
+                  Price Per Pack
+                </TableCell>
+              )}
+              {visibleColumns.pricePerPiece && (
+                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
+                  Price Per Piece
+                </TableCell>
+              )}
+              {visibleColumns.avgBaseVolumePacks && (
+                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
+                  AvgBaseVolume (Packs)
+                </TableCell>
+              )}
+              {visibleColumns.avgBaseVolumePiece && (
+                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
+                  AvgBaseVolume (Piece)
+                </TableCell>
+              )}
+              {visibleColumns.promoPrice && (
+                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
+                  Promo Price
+                </TableCell>
+              )}
+              {visibleColumns.retailersMargin && (
+                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
+                  Retailers Margin
+                </TableCell>
+              )}
+              {visibleColumns.predictedVolume && (
+                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
+                  Predicted Volume/Week
+                </TableCell>
+              )}
+              {visibleColumns.uplifts && (
+                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
+                  Uplifts vs Base
+                </TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
-            {groupBy === "ppg"
-              ? mockData.map((item) => renderRow(item, 0))
-              : groupBy === "subBrd"
+            {level === "PPG"
+              ? (groupedData as MockDataItem[]).map((item) => renderRow(item, 0))
+              : level === "SubBrand"
               ? Object.entries(groupedData).map(([subGroup, items]) => {
                   const aggregates = calculateAggregates(items as MockDataItem[]);
                   return (
@@ -212,41 +320,68 @@ const TableView = () => {
                           </IconButton>
                           {subGroup}
                         </TableCell>
-                        <TableCell sx={{ ...bodyCellStyles }}>
-                          <Typography
-                            sx={{ fontSize: "12px" }}
-                            color="textSecondary"
-                          >
-                            ({items.length})
-                          </Typography>
-                        </TableCell>
-                        <TableCell sx={{ ...bodyCellStyles }}>
-                          {/* Empty for Price Per Pack */}
-                        </TableCell>
-                        <TableCell sx={{ ...bodyCellStyles }}>
-                          {/* Empty for Price Per Piece */}
-                        </TableCell>
-                        <TableCell sx={{ ...bodyCellStyles }}>
-                          {aggregates.totalPacks}
-                        </TableCell>
-                        <TableCell sx={{ ...bodyCellStyles }}>
-                          {aggregates.totalPieces}
-                        </TableCell>
-                        <TableCell sx={{ ...bodyCellStyles }}>
-                          {/* Empty for Promo Period */}
-                        </TableCell>
-                        <TableCell sx={{ ...bodyCellStyles }}>
-                          {/* Empty for Promo Price */}
-                        </TableCell>
-                        <TableCell sx={{ ...bodyCellStyles }}>
-                          {/* Empty for Retailers Margin */}
-                        </TableCell>
-                        <TableCell sx={{ ...bodyCellStyles }}>
-                          {aggregates.totalPredictedVolume}
-                        </TableCell>
-                        <TableCell sx={{ ...bodyCellStyles }}>
-                          {aggregates.totalUplifts}
-                        </TableCell>
+                        {visibleColumns.ppg && (
+                          <TableCell sx={{ ...bodyCellStyles, textAlign: "left" }}>
+                            <Box
+                              display={"flex"}
+                              flexDirection={"row"}
+                              justifyContent={"space-between"}
+                            >
+                              <Typography
+                                sx={{ fontSize: "12px" }}
+                                color="textSecondary"
+                              >
+                                Total
+                              </Typography>
+                              <Typography
+                                sx={{ fontSize: "12px" }}
+                                color="textSecondary"
+                              >
+                                ({items.length})
+                              </Typography>
+                            </Box>
+                          </TableCell>
+                        )}
+                        {visibleColumns.pricePerPack && (
+                          <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+                            {/* Empty for Price Per Pack */}
+                          </TableCell>
+                        )}
+                        {visibleColumns.pricePerPiece && (
+                          <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+                            {/* Empty for Price Per Piece */}
+                          </TableCell>
+                        )}
+                        {visibleColumns.avgBaseVolumePacks && (
+                          <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+                            {aggregates.totalPacks}
+                          </TableCell>
+                        )}
+                        {visibleColumns.avgBaseVolumePiece && (
+                          <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+                            {aggregates.totalPieces}
+                          </TableCell>
+                        )}
+                        {visibleColumns.promoPrice && (
+                          <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+                            {/* Empty for Promo Price */}
+                          </TableCell>
+                        )}
+                        {visibleColumns.retailersMargin && (
+                          <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+                            {/* Empty for Retailers Margin */}
+                          </TableCell>
+                        )}
+                        {visibleColumns.predictedVolume && (
+                          <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+                            {aggregates.totalPredictedVolume}
+                          </TableCell>
+                        )}
+                        {visibleColumns.uplifts && (
+                          <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+                            {aggregates.totalUplifts}
+                          </TableCell>
+                        )}
                       </TableRow>
                       {expandedGroups[subGroup] &&
                         (items as MockDataItem[]).map((item) => renderRow(item, 1))}
@@ -290,41 +425,74 @@ const TableView = () => {
                                 </IconButton>
                                 {subGroup}
                               </TableCell>
-                              <TableCell sx={{ ...bodyCellStyles }}>
-                                <Typography
-                                  sx={{ fontSize: "12px" }}
-                                  color="textSecondary"
+                              {visibleColumns.ppg && (
+                                <TableCell
+                                  sx={{ ...bodyCellStyles, textAlign: "left" }}
                                 >
-                                  ({items.length})
-                                </Typography>
-                              </TableCell>
-                              <TableCell sx={{ ...bodyCellStyles }}>
-                                {/* Empty for Price Per Pack */}
-                              </TableCell>
-                              <TableCell sx={{ ...bodyCellStyles }}>
-                                {/* Empty for Price Per Piece */}
-                              </TableCell>
-                              <TableCell sx={{ ...bodyCellStyles }}>
-                                {aggregates.totalPacks}
-                              </TableCell>
-                              <TableCell sx={{ ...bodyCellStyles }}>
-                                {aggregates.totalPieces}
-                              </TableCell>
-                              <TableCell sx={{ ...bodyCellStyles }}>
-                                {/* Empty for Promo Period */}
-                              </TableCell>
-                              <TableCell sx={{ ...bodyCellStyles }}>
-                                {/* Empty for Promo Price */}
-                              </TableCell>
-                              <TableCell sx={{ ...bodyCellStyles }}>
-                                {/* Empty for Retailers Margin */}
-                              </TableCell>
-                              <TableCell sx={{ ...bodyCellStyles }}>
-                                {aggregates.totalPredictedVolume}
-                              </TableCell>
-                              <TableCell sx={{ ...bodyCellStyles }}>
-                                {aggregates.totalUplifts}
-                              </TableCell>
+                                  <Typography
+                                    sx={{ fontSize: "12px" }}
+                                    color="textSecondary"
+                                  >
+                                    ({items.length})
+                                  </Typography>
+                                </TableCell>
+                              )}
+                              {visibleColumns.pricePerPack && (
+                                <TableCell
+                                  sx={{ ...bodyCellStyles, textAlign: "right" }}
+                                >
+                                  {/* Empty for Price Per Pack */}
+                                </TableCell>
+                              )}
+                              {visibleColumns.pricePerPiece && (
+                                <TableCell
+                                  sx={{ ...bodyCellStyles, textAlign: "right" }}
+                                >
+                                  {/* Empty for Price Per Piece */}
+                                </TableCell>
+                              )}
+                              {visibleColumns.avgBaseVolumePacks && (
+                                <TableCell
+                                  sx={{ ...bodyCellStyles, textAlign: "right" }}
+                                >
+                                  {aggregates.totalPacks}
+                                </TableCell>
+                              )}
+                              {visibleColumns.avgBaseVolumePiece && (
+                                <TableCell
+                                  sx={{ ...bodyCellStyles, textAlign: "right" }}
+                                >
+                                  {aggregates.totalPieces}
+                                </TableCell>
+                              )}
+                              {visibleColumns.promoPrice && (
+                                <TableCell
+                                  sx={{ ...bodyCellStyles, textAlign: "right" }}
+                                >
+                                  {/* Empty for Promo Price */}
+                                </TableCell>
+                              )}
+                              {visibleColumns.retailersMargin && (
+                                <TableCell
+                                  sx={{ ...bodyCellStyles, textAlign: "right" }}
+                                >
+                                  {/* Empty for Retailers Margin */}
+                                </TableCell>
+                              )}
+                              {visibleColumns.predictedVolume && (
+                                <TableCell
+                                  sx={{ ...bodyCellStyles, textAlign: "right" }}
+                                >
+                                  {aggregates.totalPredictedVolume}
+                                </TableCell>
+                              )}
+                              {visibleColumns.uplifts && (
+                                <TableCell
+                                  sx={{ ...bodyCellStyles, textAlign: "right" }}
+                                >
+                                  {aggregates.totalUplifts}
+                                </TableCell>
+                              )}
                             </TableRow>
                             {expandedSubGroups[subGroup] &&
                               (items as MockDataItem[]).map((item) =>

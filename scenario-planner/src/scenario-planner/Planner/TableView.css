@@ -26,14 +26,18 @@
   font-weight: bold;
   white-space: nowrap;
   text-align: left;
-  padding: 8px;
+  padding: 6px 12px; /* Adjusted padding to reduce gaps */
+  border-right: 1px solid #e0e0e0; /* Light column separator */
+  vertical-align: middle; /* Ensure consistent alignment */
 }
 
 .table-cell {
   white-space: nowrap;
-  padding: 6px 8px;
+  padding: 6px 12px; /* Adjusted padding to match header cells */
   font-size: 0.9rem;
   color: #555;
+  border-right: 1px solid #e0e0e0; /* Light column separator */
+  vertical-align: middle; /* Ensure consistent alignment */
 }
 
 .table-row:hover {

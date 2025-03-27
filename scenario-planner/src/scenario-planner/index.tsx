@@ -7,7 +7,7 @@ const ScenarioPlanner: React.FC = () => {
   return (
     <>
       <Box>
-        <TableView />
+        <TableView level={"Brand"} />
       </Box>
     </>
   );
