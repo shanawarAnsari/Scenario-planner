@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Table,
   TableBody,
@@ -12,6 +12,9 @@ import {
   IconButton,
 } from "@mui/material";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
+import { useTableData } from "./hooks/useTableData";
+import { useColumnVisibility } from "./hooks/useColumnVisibility";
+import ColumnVisibilityControls from "./components/ColumnVisibilityControls";
 import mockData from "../mockData";
 import "./TableView.css";
 
@@ -58,78 +61,16 @@ interface TableViewProps {
 }
 
 const TableView: React.FC<TableViewProps> = ({ level }) => {
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
-  const [expandedSubGroups, setExpandedSubGroups] = useState<
-    Record<string, boolean>
-  >({});
-  const [visibleColumns, setVisibleColumns] = useState({
-    ppg: true,
-    pricePerPack: true,
-    pricePerPiece: true,
-    avgBaseVolumePacks: true,
-    avgBaseVolumePiece: true,
-    promoPrice: true,
-    retailersMargin: true,
-    predictedVolume: true,
-    uplifts: true,
-  });
+  const {
+    groupedData,
+    expandedGroups,
+    expandedSubGroups,
+    toggleGroup,
+    toggleSubGroup,
+    calculateAggregates,
+  } = useTableData(level);
 
-  const toggleColumnVisibility = (column: keyof typeof visibleColumns) => {
-    setVisibleColumns((prev) => ({
-      ...prev,
-      [column]: !prev[column],
-    }));
-  };
-
-  const toggleGroup = (group: string) => {
-    setExpandedGroups((prev) => ({ ...prev, [group]: !prev[group] }));
-  };
-
-  const toggleSubGroup = (subGroup: string) => {
-    setExpandedSubGroups((prev) => ({ ...prev, [subGroup]: !prev[subGroup] }));
-  };
-
-  const groupedData =
-    level === "Brand"
-      ? mockData.reduce((acc, item) => {
-          if (!acc[item.brd]) acc[item.brd] = {};
-          if (!acc[item.brd][item.subBrd]) acc[item.brd][item.subBrd] = [];
-          acc[item.brd][item.subBrd].push(item);
-          return acc;
-        }, {} as Record<string, Record<string, MockDataItem[]>>)
-      : level === "SubBrand"
-      ? mockData.reduce((acc, item) => {
-          if (!acc[item.subBrd]) acc[item.subBrd] = [];
-          acc[item.subBrd].push(item);
-          return acc;
-        }, {} as Record<string, MockDataItem[]>)
-      : mockData;
-
-  const calculateAggregates = (items: MockDataItem[]) => {
-    const totalPacks = items.reduce(
-      (sum, item) => sum + item["AvgBaseVolume(Packs)"],
-      0
-    );
-    const totalPieces = items.reduce(
-      (sum, item) => sum + item["AvgBaseVolume(Piece)"],
-      0
-    );
-    const totalPredictedVolume = items.reduce(
-      (sum, item) => sum + item["predicted volume per week"],
-      0
-    );
-    const totalUplifts = items.reduce(
-      (sum, item) => sum + item["uplifts vs base"],
-      0
-    );
-
-    return {
-      totalPacks,
-      totalPieces,
-      totalPredictedVolume,
-      totalUplifts,
-    };
-  };
+  const { visibleColumns, toggleColumnVisibility } = useColumnVisibility();
 
   const renderRow = (item: MockDataItem, level: number) => (
     <TableRow key={item.pid} className="table-row">
@@ -199,40 +140,10 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
           paddingBottom: "8px",
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            gap: "8px",
-            backgroundColor: "#fff",
-            borderRadius: "4px",
-            padding: "4px 8px",
-            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          {Object.keys(visibleColumns).map((column) => (
-            <button
-              key={column}
-              onClick={() =>
-                toggleColumnVisibility(column as keyof typeof visibleColumns)
-              }
-              style={{
-                border: "none",
-                background: visibleColumns[column as keyof typeof visibleColumns]
-                  ? "#1976d2"
-                  : "#e0e0e0",
-                color: visibleColumns[column as keyof typeof visibleColumns]
-                  ? "#fff"
-                  : "#000",
-                padding: "4px 8px",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "0.8rem",
-              }}
-            >
-              {column}
-            </button>
-          ))}
-        </Box>
+        <ColumnVisibilityControls
+          visibleColumns={visibleColumns}
+          toggleColumnVisibility={toggleColumnVisibility}
+        />
       </Box>
       <TableContainer component={Paper} className="table-container">
         <Table stickyHeader size="small">
@@ -337,7 +248,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                                 sx={{ fontSize: "12px" }}
                                 color="textSecondary"
                               >
-                                ({items.length})
+                                ({items?.length})
                               </Typography>
                             </Box>
                           </TableCell>
@@ -429,12 +340,24 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                                 <TableCell
                                   sx={{ ...bodyCellStyles, textAlign: "left" }}
                                 >
-                                  <Typography
-                                    sx={{ fontSize: "12px" }}
-                                    color="textSecondary"
+                                  <Box
+                                    display={"flex"}
+                                    flexDirection={"row"}
+                                    justifyContent={"space-between"}
                                   >
-                                    ({items.length})
-                                  </Typography>
+                                    <Typography
+                                      sx={{ fontSize: "12px" }}
+                                      color="textSecondary"
+                                    >
+                                      Total
+                                    </Typography>
+                                    <Typography
+                                      sx={{ fontSize: "12px" }}
+                                      color="textSecondary"
+                                    >
+                                      ({items?.length})
+                                    </Typography>
+                                  </Box>
                                 </TableCell>
                               )}
                               {visibleColumns.pricePerPack && (
