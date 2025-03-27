@@ -70,7 +70,8 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
     calculateAggregates,
   } = useTableData(level);
 
-  const { visibleColumns, toggleColumnVisibility } = useColumnVisibility();
+  const { visibleColumns, toggleColumnVisibility, columnDisplayNames } =
+    useColumnVisibility();
 
   const renderRow = (item: MockDataItem, level: number) => (
     <TableRow key={item.pid} className="table-row">
@@ -135,14 +136,12 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
           display: "flex",
           justifyContent: "flex-end",
           alignItems: "center",
-          marginBottom: "8px",
-          borderBottom: "1px solid #ddd",
-          paddingBottom: "8px",
         }}
       >
         <ColumnVisibilityControls
           visibleColumns={visibleColumns}
           toggleColumnVisibility={toggleColumnVisibility}
+          columnDisplayNames={columnDisplayNames}
         />
       </Box>
       <TableContainer component={Paper} className="table-container">

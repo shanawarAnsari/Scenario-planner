@@ -1,43 +1,52 @@
 import React from "react";
+import { TextField, MenuItem, Checkbox, FormControlLabel } from "@mui/material";
 
 interface ColumnVisibilityControlsProps {
   visibleColumns: Record<string, boolean>;
   toggleColumnVisibility: (column: any) => void;
+  columnDisplayNames: Record<string, string>;
 }
 
 const ColumnVisibilityControls: React.FC<ColumnVisibilityControlsProps> = ({
   visibleColumns,
   toggleColumnVisibility,
+  columnDisplayNames,
 }) => {
+  const selectedColumns = Object.keys(visibleColumns).filter(
+    (column) => visibleColumns[column]
+  );
+
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: "8px",
-        backgroundColor: "#fff",
-        borderRadius: "4px",
-        padding: "4px 8px",
-        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
+    <TextField
+      select
+      label="Column Visibility"
+      variant="outlined"
+      fullWidth
+      size="small"
+      value={selectedColumns} // Pass the array of selected columns
+      SelectProps={{
+        multiple: true,
+        renderValue: () =>
+          `${selectedColumns.length} of ${
+            Object.keys(visibleColumns).length
+          } selected`, // Show selected count
       }}
+      style={{ backgroundColor: "#fff", borderRadius: "4px", maxWidth: "180px" }}
     >
       {Object.keys(visibleColumns).map((column) => (
-        <button
-          key={column}
-          onClick={() => toggleColumnVisibility(column)}
-          style={{
-            border: "none",
-            background: visibleColumns[column] ? "#1976d2" : "#e0e0e0",
-            color: visibleColumns[column] ? "#fff" : "#000",
-            padding: "4px 8px",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "0.8rem",
-          }}
-        >
-          {column}
-        </button>
+        <MenuItem key={column} value={column}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={visibleColumns[column]}
+                onChange={() => toggleColumnVisibility(column)}
+              />
+            }
+            label={columnDisplayNames[column] || column} // Use display name
+          />
+        </MenuItem>
       ))}
-    </div>
+    </TextField>
   );
 };
 
