@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import mockData from "../../mockData";
 
 interface MockDataItem {
@@ -19,9 +19,11 @@ interface MockDataItem {
   RetailersMargin: number;
   "predicted volume per week": number;
   "uplifts vs base": number;
+  osku: string; // Add osku field
 }
 
-export const useTableData = (level: "Brand" | "SubBrand" | "PPG") => {
+// Updated grouping logic to strictly follow the hierarchy for each selected level
+export const useTableData = (level: "Brand" | "SubBrand" | "PPG" | "OSKU") => {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [expandedSubGroups, setExpandedSubGroups] = useState<
     Record<string, boolean>
@@ -35,47 +37,47 @@ export const useTableData = (level: "Brand" | "SubBrand" | "PPG") => {
     setExpandedSubGroups((prev) => ({ ...prev, [subGroup]: !prev[subGroup] }));
   };
 
-  const groupedData =
-    level === "Brand"
-      ? mockData.reduce((acc, item) => {
-          if (!acc[item.brd]) acc[item.brd] = {};
-          if (!acc[item.brd][item.subBrd]) acc[item.brd][item.subBrd] = [];
-          acc[item.brd][item.subBrd].push(item);
+  const groupedData = useMemo(() => {
+    switch (level) {
+      case "Brand":
+        return mockData.reduce((acc, item) => {
+          if (!acc[item.brd]) {
+            acc[item.brd] = {};
+          }
+          if (!acc[item.brd][item.subBrd]) {
+            acc[item.brd][item.subBrd] = {};
+          }
+          if (!acc[item.brd][item.subBrd][item.ppg]) {
+            acc[item.brd][item.subBrd][item.ppg] = [];
+          }
+          acc[item.brd][item.subBrd][item.ppg].push(item);
           return acc;
-        }, {} as Record<string, Record<string, MockDataItem[]>>)
-      : level === "SubBrand"
-      ? mockData.reduce((acc, item) => {
-          if (!acc[item.subBrd]) acc[item.subBrd] = [];
-          acc[item.subBrd].push(item);
+        }, {} as Record<string, Record<string, Record<string, MockDataItem[]>>>);
+      case "SubBrand":
+        return mockData.reduce((acc, item) => {
+          if (!acc[item.subBrd]) {
+            acc[item.subBrd] = {};
+          }
+          if (!acc[item.subBrd][item.ppg]) {
+            acc[item.subBrd][item.ppg] = [];
+          }
+          acc[item.subBrd][item.ppg].push(item);
           return acc;
-        }, {} as Record<string, MockDataItem[]>)
-      : mockData;
-
-  const calculateAggregates = (items: MockDataItem[]) => {
-    const totalPacks = items.reduce(
-      (sum, item) => sum + item["AvgBaseVolume(Packs)"],
-      0
-    );
-    const totalPieces = items.reduce(
-      (sum, item) => sum + item["AvgBaseVolume(Piece)"],
-      0
-    );
-    const totalPredictedVolume = items.reduce(
-      (sum, item) => sum + item["predicted volume per week"],
-      0
-    );
-    const totalUplifts = items.reduce(
-      (sum, item) => sum + item["uplifts vs base"],
-      0
-    );
-
-    return {
-      totalPacks,
-      totalPieces,
-      totalPredictedVolume,
-      totalUplifts,
-    };
-  };
+        }, {} as Record<string, Record<string, MockDataItem[]>>);
+      case "PPG":
+        return mockData.reduce((acc, item) => {
+          if (!acc[item.ppg]) {
+            acc[item.ppg] = [];
+          }
+          acc[item.ppg].push(item);
+          return acc;
+        }, {} as Record<string, MockDataItem[]>);
+      case "OSKU":
+        return mockData;
+      default:
+        return {};
+    }
+  }, [level]);
 
   return {
     groupedData,
@@ -83,6 +85,5 @@ export const useTableData = (level: "Brand" | "SubBrand" | "PPG") => {
     expandedSubGroups,
     toggleGroup,
     toggleSubGroup,
-    calculateAggregates,
   };
 };

@@ -17,14 +17,15 @@ const mockData = [
     RetailersMargin: 18,
     "predicted volume per week": 110,
     "uplifts vs base": 15,
+    osku: "randomText01",
   },
   {
     mfr: "K-C",
-    cust: "Ocado",
+    cust: "Morrisons Group",
     cat: "BATH TISSUE",
     brd: "ANDREX",
-    subBrd: "Andrex Supreme Quilts",
-    pid: "Ocado_BATH TISSUE_K-C_07 Andrex BT Quilted 4 Roll",
+    subBrd: "Andrex Puppies",
+    pid: "Morrisons Group_BATH TISSUE_K-C_07 Andrex Puppy 4 roll",
     ppg: "07 Andrex BT Quilted 4 Roll",
     section: "base",
     priceperpiece: 0.6,
@@ -36,6 +37,7 @@ const mockData = [
     RetailersMargin: 18,
     "predicted volume per week": 110,
     "uplifts vs base": 15,
+    osku: "randomText02",
   },
   {
     mfr: "K-C",
@@ -55,6 +57,7 @@ const mockData = [
     RetailersMargin: 18,
     "predicted volume per week": 110,
     "uplifts vs base": 15,
+    osku: "randomText3",
   },
 
   {
@@ -75,6 +78,7 @@ const mockData = [
     RetailersMargin: 15,
     "predicted volume per week": 120,
     "uplifts vs base": 20,
+    osku: "randomText4",
   },
   {
     mfr: "K-C",
@@ -94,6 +98,7 @@ const mockData = [
     RetailersMargin: 12,
     "predicted volume per week": 100,
     "uplifts vs base": 10,
+    osku: "randomText5",
   },
   {
     mfr: "K-C",
@@ -113,6 +118,7 @@ const mockData = [
     RetailersMargin: 15,
     "predicted volume per week": 120,
     "uplifts vs base": 20,
+    osku: "randomText6",
   },
   {
     mfr: "K-C",
@@ -132,6 +138,7 @@ const mockData = [
     RetailersMargin: 18,
     "predicted volume per week": 110,
     "uplifts vs base": 15,
+    osku: "randomText7",
   },
   {
     mfr: "P&G",
@@ -151,6 +158,7 @@ const mockData = [
     RetailersMargin: 12,
     "predicted volume per week": 100,
     "uplifts vs base": 10,
+    osku: "randomText8",
   },
 ];
 
