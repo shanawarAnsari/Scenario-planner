@@ -1,25 +1,14 @@
 import { useState, useMemo } from "react";
-import mockData from "../../mockData";
+import { mockData } from "../../mockData";
 
 interface MockDataItem {
-  mfr: string;
-  cust: string;
-  cat: string;
+  osku: string;
   brd: string;
   subBrd: string;
-  pid: string;
   ppg: string;
-  section: string;
-  priceperpiece: number;
-  priceperpack: number;
-  "AvgBaseVolume(Packs)": number;
-  "AvgBaseVolume(Piece)": number;
-  PromoPeriod: string;
-  PromoPrice: number;
-  RetailersMargin: number;
-  "predicted volume per week": number;
-  "uplifts vs base": number;
-  osku: string; // Add osku field
+  pid: string;
+  ppk: number;
+  vpk: number;
 }
 
 // Updated grouping logic to strictly follow the hierarchy for each selected level
@@ -28,6 +17,7 @@ export const useTableData = (level: "Brand" | "SubBrand" | "PPG" | "OSKU") => {
   const [expandedSubGroups, setExpandedSubGroups] = useState<
     Record<string, boolean>
   >({});
+  const [expandedPPGs, setExpandedPPGs] = useState<Record<string, boolean>>({});
 
   const toggleGroup = (group: string) => {
     setExpandedGroups((prev) => ({ ...prev, [group]: !prev[group] }));
@@ -35,6 +25,10 @@ export const useTableData = (level: "Brand" | "SubBrand" | "PPG" | "OSKU") => {
 
   const toggleSubGroup = (subGroup: string) => {
     setExpandedSubGroups((prev) => ({ ...prev, [subGroup]: !prev[subGroup] }));
+  };
+
+  const togglePPG = (ppg: string) => {
+    setExpandedPPGs((prev) => ({ ...prev, [ppg]: !prev[ppg] }));
   };
 
   const groupedData = useMemo(() => {
@@ -83,7 +77,9 @@ export const useTableData = (level: "Brand" | "SubBrand" | "PPG" | "OSKU") => {
     groupedData,
     expandedGroups,
     expandedSubGroups,
+    expandedPPGs,
     toggleGroup,
     toggleSubGroup,
+    togglePPG,
   };
 };

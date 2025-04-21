@@ -13,9 +13,6 @@ import {
 } from "@mui/material";
 import { ExpandMore, ExpandLess } from "@mui/icons-material";
 import { useTableData } from "./hooks/useTableData";
-import { useColumnVisibility } from "./hooks/useColumnVisibility";
-import ColumnVisibilityControls from "./components/ColumnVisibilityControls";
-import mockData from "../mockData";
 import "./TableView.css";
 
 // Common styles
@@ -37,23 +34,13 @@ const bodyCellStyles = {
 };
 
 interface MockDataItem {
-  mfr: string;
-  cust: string;
-  cat: string;
+  osku: string;
   brd: string;
   subBrd: string;
-  pid: string;
   ppg: string;
-  section: string;
-  priceperpiece: number;
-  priceperpack: number;
-  "AvgBaseVolume(Packs)": number;
-  "AvgBaseVolume(Piece)": number;
-  PromoPeriod: string;
-  PromoPrice: number;
-  RetailersMargin: number;
-  "predicted volume per week": number;
-  "uplifts vs base": number;
+  pid: string;
+  ppk: number;
+  vpk: number;
 }
 
 interface TableViewProps {
@@ -66,63 +53,25 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
     groupedData,
     expandedGroups,
     expandedSubGroups,
+    expandedPPGs,
     toggleGroup,
     toggleSubGroup,
+    togglePPG,
   } = useTableData(level);
 
-  const { visibleColumns, toggleColumnVisibility, columnDisplayNames } =
-    useColumnVisibility();
-
-  const renderRow = (item: MockDataItem, level: number) => (
+  const renderRow = (item: MockDataItem, indentLevel: number) => (
     <TableRow key={item.pid} className="table-row">
-      {level !== 0 && (
-        <TableCell sx={{ ...bodyCellStyles }} colSpan={level}></TableCell>
-      )}
-      {visibleColumns.ppg && (
-        <TableCell sx={{ ...bodyCellStyles, textAlign: "left" }}>
-          {item.ppg}
-        </TableCell>
-      )}
-      {visibleColumns.pricePerPack && (
-        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
-          £{item.priceperpack}
-        </TableCell>
-      )}
-      {visibleColumns.pricePerPiece && (
-        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
-          £{item.priceperpiece}
-        </TableCell>
-      )}
-      {visibleColumns.avgBaseVolumePacks && (
-        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
-          {item["AvgBaseVolume(Packs)"]}
-        </TableCell>
-      )}
-      {visibleColumns.avgBaseVolumePiece && (
-        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
-          {item["AvgBaseVolume(Piece)"]}
-        </TableCell>
-      )}
-      {visibleColumns.promoPrice && (
-        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
-          £{item.PromoPrice}
-        </TableCell>
-      )}
-      {visibleColumns.retailersMargin && (
-        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
-          {item.RetailersMargin}%
-        </TableCell>
-      )}
-      {visibleColumns.predictedVolume && (
-        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
-          {item["predicted volume per week"]}
-        </TableCell>
-      )}
-      {visibleColumns.uplifts && (
-        <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
-          {item["uplifts vs base"]}
-        </TableCell>
-      )}
+      <TableCell
+        sx={{ ...bodyCellStyles, paddingLeft: `${indentLevel * 18 + 8}px` }}
+      >
+        {item.osku}
+      </TableCell>
+      <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+        £{item.ppk}
+      </TableCell>
+      <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
+        {item.vpk}
+      </TableCell>
     </TableRow>
   );
 
@@ -132,7 +81,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
         return Object.entries(groupedData).map(([brand, subGroups]) => (
           <React.Fragment key={brand}>
             <TableRow className="group-row">
-              <TableCell colSpan={12} className="group-header">
+              <TableCell colSpan={3} className="group-header">
                 <IconButton size="small" onClick={() => toggleGroup(brand)}>
                   {expandedGroups[brand] ? <ExpandLess /> : <ExpandMore />}
                 </IconButton>
@@ -146,7 +95,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                 <React.Fragment key={subBrand}>
                   <TableRow className="subgroup-row">
                     <TableCell
-                      colSpan={2}
+                      colSpan={3}
                       className="subgroup-header"
                       style={{ paddingLeft: "32px" }}
                     >
@@ -172,10 +121,23 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                             className="ppg-header"
                             style={{ paddingLeft: "48px" }}
                           >
+                            <IconButton size="small" onClick={() => togglePPG(ppg)}>
+                              {expandedPPGs[ppg] ? <ExpandLess /> : <ExpandMore />}
+                            </IconButton>
                             {ppg}
+                            <Typography
+                              variant="caption"
+                              component="span"
+                              sx={{ marginLeft: 1, color: "gray" }}
+                            >
+                              ({(items as MockDataItem[]).length})
+                            </Typography>
                           </TableCell>
                         </TableRow>
-                        {(items as MockDataItem[]).map((item) => renderRow(item, 3))}
+                        {expandedPPGs[ppg] &&
+                          (items as MockDataItem[]).map((item) =>
+                            renderRow(item, 3)
+                          )}
                       </React.Fragment>
                     ))}
                 </React.Fragment>
@@ -187,7 +149,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
           <React.Fragment key={subBrand}>
             <TableRow className="subgroup-row">
               <TableCell
-                colSpan={2}
+                colSpan={3}
                 className="subgroup-header"
                 style={{ paddingLeft: "16px" }}
               >
@@ -206,10 +168,21 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                       className="ppg-header"
                       style={{ paddingLeft: "32px" }}
                     >
+                      <IconButton size="small" onClick={() => togglePPG(ppg)}>
+                        {expandedPPGs[ppg] ? <ExpandLess /> : <ExpandMore />}
+                      </IconButton>
                       {ppg}
+                      <Typography
+                        variant="caption"
+                        component="span"
+                        sx={{ marginLeft: 1, color: "gray" }}
+                      >
+                        ({(items as MockDataItem[]).length})
+                      </Typography>
                     </TableCell>
                   </TableRow>
-                  {(items as MockDataItem[]).map((item) => renderRow(item, 2))}
+                  {expandedPPGs[ppg] &&
+                    (items as MockDataItem[]).map((item) => renderRow(item, 2))}
                 </React.Fragment>
               ))}
           </React.Fragment>
@@ -223,14 +196,25 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                 className="ppg-header"
                 style={{ paddingLeft: "16px" }}
               >
+                <IconButton size="small" onClick={() => togglePPG(ppg)}>
+                  {expandedPPGs[ppg] ? <ExpandLess /> : <ExpandMore />}
+                </IconButton>
                 {ppg}
+                <Typography
+                  variant="caption"
+                  component="span"
+                  sx={{ marginLeft: 1, color: "gray" }}
+                >
+                  ({(items as MockDataItem[]).length})
+                </Typography>
               </TableCell>
             </TableRow>
-            {(items as MockDataItem[]).map((item) => renderRow(item, 1))}
+            {expandedPPGs[ppg] &&
+              (items as MockDataItem[]).map((item) => renderRow(item, 1))}
           </React.Fragment>
         ));
       case "OSKU":
-        return (groupedData as MockDataItem[]).map((item) => renderRow(item, 0));
+        return (groupedData as any).map((item: any) => renderRow(item, 0));
       default:
         return null;
     }
@@ -241,77 +225,17 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
       <Typography variant="h5" className="table-title">
         Scenario Planner Table
       </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "center",
-        }}
-      >
-        <ColumnVisibilityControls
-          visibleColumns={visibleColumns}
-          toggleColumnVisibility={toggleColumnVisibility}
-          columnDisplayNames={columnDisplayNames}
-        />
-      </Box>
       <TableContainer component={Paper} className="table-container">
         <Table stickyHeader size="small">
           <TableHead>
             <TableRow>
-              {level !== "PPG" && (
-                <TableCell
-                  sx={{
-                    ...headerCellStyles,
-                    padding: "6px 8px",
-                  }}
-                  colSpan={level === "SubBrand" ? 1 : 2}
-                ></TableCell>
-              )}
-              {visibleColumns.ppg && (
-                <TableCell sx={{ ...headerCellStyles, textAlign: "left" }}>
-                  PPG
-                </TableCell>
-              )}
-              {visibleColumns.pricePerPack && (
-                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
-                  Price Per Pack
-                </TableCell>
-              )}
-              {visibleColumns.pricePerPiece && (
-                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
-                  Price Per Piece
-                </TableCell>
-              )}
-              {visibleColumns.avgBaseVolumePacks && (
-                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
-                  AvgBaseVolume (Packs)
-                </TableCell>
-              )}
-              {visibleColumns.avgBaseVolumePiece && (
-                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
-                  AvgBaseVolume (Piece)
-                </TableCell>
-              )}
-              {visibleColumns.promoPrice && (
-                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
-                  Promo Price
-                </TableCell>
-              )}
-              {visibleColumns.retailersMargin && (
-                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
-                  Retailers Margin
-                </TableCell>
-              )}
-              {visibleColumns.predictedVolume && (
-                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
-                  Predicted Volume/Week
-                </TableCell>
-              )}
-              {visibleColumns.uplifts && (
-                <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
-                  Uplifts vs Base
-                </TableCell>
-              )}
+              <TableCell sx={{ ...headerCellStyles }}>Product</TableCell>
+              <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
+                Price Per Pack
+              </TableCell>
+              <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
+                Average Volume Per Pack
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>{renderGroupedData()}</TableBody>
