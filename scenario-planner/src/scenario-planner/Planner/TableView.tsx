@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,44 +10,154 @@ import {
   Typography,
   Box,
   IconButton,
+  Tooltip,
 } from "@mui/material";
-import { ExpandMore, ExpandLess } from "@mui/icons-material";
-import { useTableData } from "./hooks/useTableData";
+import { ExpandMore, ExpandLess, UnfoldMore, UnfoldLess } from "@mui/icons-material";
+import {
+  useTableData,
+  MockDataItem,
+  GroupLevel,
+  GroupedByBrand,
+  GroupedBySubBrand,
+  GroupedByPPG,
+} from "./hooks/useTableData";
 import "./TableView.css";
 
-// Common styles
-const headerCellStyles = {
-  backgroundColor: "#fff", // MUI blue
-  color: "gray",
-  fontWeight: "bold",
-  fontSize: "0.8rem",
-  whiteSpace: "nowrap",
-};
-
-const bodyCellStyles = {
-  whiteSpace: "nowrap",
-  padding: "6px 20px",
-  fontSize: "0.9rem",
-  color: "#555",
-  borderRight: "1px solid #ddd",
-  fontWeight: "600",
-};
-
-interface MockDataItem {
-  osku: string;
-  brd: string;
-  subBrd: string;
-  ppg: string;
-  pid: string;
-  ppk: number;
-  vpk: number;
-}
-
+// Props interfacS
 interface TableViewProps {
-  level: "Brand" | "SubBrand" | "PPG" | "OSKU";
+  level: GroupLevel;
 }
 
-// Updated grouping and rendering logic to strictly follow the hierarchy for each selected level
+// Extracted row component for better readability
+const DataRow: React.FC<{ item: MockDataItem; indentLevel: number }> = ({
+  item,
+  indentLevel,
+}) => {
+  const indentClass = `indent-level-${indentLevel}`;
+
+  return (
+    <TableRow key={item.pid} className="table-row">
+      <TableCell className={`body-cell ${indentClass}`}>{item.osku}</TableCell>
+      <TableCell className="body-cell text-right">{item.ppk.toFixed(2)}</TableCell>
+      <TableCell className="body-cell text-right">{item.ppka.toFixed(2)}</TableCell>
+      <TableCell className="body-cell text-right">
+        {item.deltaPpk.toFixed(2)}
+      </TableCell>
+      <TableCell className="body-cell text-right">{item.vpk}</TableCell>
+      <TableCell className="body-cell text-right">{item.vpka}</TableCell>
+      <TableCell className="body-cell text-right">{item.deltaVpk}</TableCell>
+      <TableCell className="body-cell text-right">{item.r.toFixed(2)}</TableCell>
+      <TableCell className="body-cell text-right">{item.ra.toFixed(2)}</TableCell>
+      <TableCell className="body-cell text-right">
+        {item.deltaRev.toFixed(2)}
+      </TableCell>
+    </TableRow>
+  );
+};
+
+// Group row components
+const GroupRow: React.FC<{
+  id: string;
+  isExpanded: boolean;
+  onToggle: (id: string) => void;
+  paddingLeft?: number;
+  itemCount?: number;
+}> = ({ id, isExpanded, onToggle, paddingLeft = 16, itemCount }) => (
+  <TableRow className="group-row">
+    <TableCell
+      colSpan={10}
+      className="group-header"
+      style={{ paddingLeft: `${paddingLeft}px` }}
+    >
+      <IconButton size="small" onClick={() => onToggle(id)}>
+        {isExpanded ? (
+          <ExpandLess fontSize="small" />
+        ) : (
+          <ExpandMore fontSize="small" />
+        )}
+      </IconButton>
+      {id}
+      {itemCount !== undefined && (
+        <Typography variant="caption" component="span" className="group-count">
+          ({itemCount})
+        </Typography>
+      )}
+    </TableCell>
+  </TableRow>
+);
+
+// Table header component
+const TableHeader: React.FC<{
+  allExpanded: boolean;
+  toggleAllGroups: () => void;
+}> = ({ allExpanded, toggleAllGroups }) => (
+  <TableHead>
+    <TableRow>
+      <TableCell
+        className="header-cell-base header-cell product-header-cell"
+        rowSpan={3}
+      >
+        <Box className="product-header-content">
+          <Tooltip title={allExpanded ? "Collapse All" : "Expand All"}>
+            <IconButton size="small" onClick={toggleAllGroups}>
+              {allExpanded ? <UnfoldLess /> : <UnfoldMore />}
+            </IconButton>
+          </Tooltip>
+          <span>Product</span>
+        </Box>
+      </TableCell>
+      <TableCell
+        className="header-cell-base group-header-cell no-bottom-border"
+        colSpan={3}
+      >
+        Price (£)
+      </TableCell>
+      <TableCell
+        className="header-cell-base group-header-cell no-bottom-border"
+        colSpan={3}
+      >
+        Volume
+      </TableCell>
+      <TableCell
+        className="header-cell-base group-header-cell no-bottom-border"
+        colSpan={3}
+      >
+        Revenue (£)
+      </TableCell>
+    </TableRow>
+    <TableRow>
+      <TableCell className="header-cell-base header-cell text-right">
+        Price Per Pack
+      </TableCell>
+      <TableCell className="header-cell-base header-cell text-right">
+        Price Per Pack After
+      </TableCell>
+      <TableCell className="header-cell-base header-cell text-right">
+        Delta PPK
+      </TableCell>
+      <TableCell className="header-cell-base header-cell text-right">
+        Volume Per Pack
+      </TableCell>
+      <TableCell className="header-cell-base header-cell text-right">
+        Volume Per Pack After
+      </TableCell>
+      <TableCell className="header-cell-base header-cell text-right">
+        Delta VPK
+      </TableCell>
+      <TableCell className="header-cell-base header-cell text-right">
+        Revenue
+      </TableCell>
+      <TableCell className="header-cell-base header-cell text-right">
+        Revenue After
+      </TableCell>
+      <TableCell className="header-cell-base header-cell text-right">
+        Delta Rev
+      </TableCell>
+    </TableRow>
+  </TableHead>
+);
+
+// Main TableView component
 const TableView: React.FC<TableViewProps> = ({ level }) => {
   const {
     groupedData,
@@ -57,164 +167,130 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
     toggleGroup,
     toggleSubGroup,
     togglePPG,
+    expandAll,
+    collapseAll,
   } = useTableData(level);
 
-  const renderRow = (item: MockDataItem, indentLevel: number) => (
-    <TableRow key={item.pid} className="table-row">
-      <TableCell
-        sx={{ ...bodyCellStyles, paddingLeft: `${indentLevel * 18 + 8}px` }}
-      >
-        {item.osku}
-      </TableCell>
-      <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
-        £{item.ppk}
-      </TableCell>
-      <TableCell sx={{ ...bodyCellStyles, textAlign: "right" }}>
-        {item.vpk}
-      </TableCell>
-    </TableRow>
-  );
+  const [allExpanded, setAllExpanded] = useState(false);
 
+  // Toggle all groups function
+  const toggleAllGroups = () => {
+    setAllExpanded(!allExpanded);
+
+    if (allExpanded) {
+      collapseAll();
+    } else {
+      expandAll();
+    }
+  };
+
+  // Render functions for each level
+  const renderBrandLevel = () => {
+    const data = groupedData as GroupedByBrand;
+    return Object.entries(data).map(([brand, subGroups]) => (
+      <React.Fragment key={brand}>
+        <GroupRow
+          id={brand}
+          isExpanded={expandedGroups[brand]}
+          onToggle={toggleGroup}
+        />
+        {expandedGroups[brand] &&
+          Object.entries(subGroups).map(([subBrand, ppgGroups]) => (
+            <React.Fragment key={subBrand}>
+              <GroupRow
+                id={subBrand}
+                isExpanded={expandedSubGroups[subBrand]}
+                onToggle={toggleSubGroup}
+                paddingLeft={32}
+              />
+              {expandedSubGroups[subBrand] &&
+                Object.entries(ppgGroups).map(([ppg, items]) => (
+                  <React.Fragment key={ppg}>
+                    <GroupRow
+                      id={ppg}
+                      isExpanded={expandedPPGs[ppg]}
+                      onToggle={togglePPG}
+                      paddingLeft={48}
+                      itemCount={items.length}
+                    />
+                    {expandedPPGs[ppg] &&
+                      items.map((item) => (
+                        <DataRow key={item.pid} item={item} indentLevel={3} />
+                      ))}
+                  </React.Fragment>
+                ))}
+            </React.Fragment>
+          ))}
+      </React.Fragment>
+    ));
+  };
+
+  const renderSubBrandLevel = () => {
+    const data = groupedData as GroupedBySubBrand;
+    return Object.entries(data).map(([subBrand, ppgGroups]) => (
+      <React.Fragment key={subBrand}>
+        <GroupRow
+          id={subBrand}
+          isExpanded={expandedGroups[subBrand]}
+          onToggle={toggleGroup}
+          paddingLeft={16}
+        />
+        {expandedGroups[subBrand] &&
+          Object.entries(ppgGroups).map(([ppg, items]) => (
+            <React.Fragment key={ppg}>
+              <GroupRow
+                id={ppg}
+                isExpanded={expandedPPGs[ppg]}
+                onToggle={togglePPG}
+                paddingLeft={32}
+                itemCount={items.length}
+              />
+              {expandedPPGs[ppg] &&
+                items.map((item) => (
+                  <DataRow key={item.pid} item={item} indentLevel={2} />
+                ))}
+            </React.Fragment>
+          ))}
+      </React.Fragment>
+    ));
+  };
+
+  const renderPPGLevel = () => {
+    const data = groupedData as GroupedByPPG;
+    return Object.entries(data).map(([ppg, items]) => (
+      <React.Fragment key={ppg}>
+        <GroupRow
+          id={ppg}
+          isExpanded={expandedPPGs[ppg]}
+          onToggle={togglePPG}
+          paddingLeft={16}
+          itemCount={items.length}
+        />
+        {expandedPPGs[ppg] &&
+          items.map((item) => (
+            <DataRow key={item.pid} item={item} indentLevel={1} />
+          ))}
+      </React.Fragment>
+    ));
+  };
+
+  const renderOSKULevel = () => {
+    return (groupedData as MockDataItem[]).map((item) => (
+      <DataRow key={item.pid} item={item} indentLevel={0} />
+    ));
+  };
+
+  // Main render function
   const renderGroupedData = () => {
     switch (level) {
       case "Brand":
-        return Object.entries(groupedData).map(([brand, subGroups]) => (
-          <React.Fragment key={brand}>
-            <TableRow className="group-row">
-              <TableCell colSpan={3} className="group-header">
-                <IconButton size="small" onClick={() => toggleGroup(brand)}>
-                  {expandedGroups[brand] ? <ExpandLess /> : <ExpandMore />}
-                </IconButton>
-                {brand}
-              </TableCell>
-            </TableRow>
-            {expandedGroups[brand] &&
-              Object.entries(
-                subGroups as Record<string, Record<string, MockDataItem[]>>
-              ).map(([subBrand, ppgGroups]) => (
-                <React.Fragment key={subBrand}>
-                  <TableRow className="subgroup-row">
-                    <TableCell
-                      colSpan={3}
-                      className="subgroup-header"
-                      style={{ paddingLeft: "32px" }}
-                    >
-                      <IconButton
-                        size="small"
-                        onClick={() => toggleSubGroup(subBrand)}
-                      >
-                        {expandedSubGroups[subBrand] ? (
-                          <ExpandLess />
-                        ) : (
-                          <ExpandMore />
-                        )}
-                      </IconButton>
-                      {subBrand}
-                    </TableCell>
-                  </TableRow>
-                  {expandedSubGroups[subBrand] &&
-                    Object.entries(ppgGroups).map(([ppg, items]) => (
-                      <React.Fragment key={ppg}>
-                        <TableRow className="ppg-row">
-                          <TableCell
-                            colSpan={3}
-                            className="ppg-header"
-                            style={{ paddingLeft: "48px" }}
-                          >
-                            <IconButton size="small" onClick={() => togglePPG(ppg)}>
-                              {expandedPPGs[ppg] ? <ExpandLess /> : <ExpandMore />}
-                            </IconButton>
-                            {ppg}
-                            <Typography
-                              variant="caption"
-                              component="span"
-                              sx={{ marginLeft: 1, color: "gray" }}
-                            >
-                              ({(items as MockDataItem[]).length})
-                            </Typography>
-                          </TableCell>
-                        </TableRow>
-                        {expandedPPGs[ppg] &&
-                          (items as MockDataItem[]).map((item) =>
-                            renderRow(item, 3)
-                          )}
-                      </React.Fragment>
-                    ))}
-                </React.Fragment>
-              ))}
-          </React.Fragment>
-        ));
+        return renderBrandLevel();
       case "SubBrand":
-        return Object.entries(groupedData).map(([subBrand, ppgGroups]) => (
-          <React.Fragment key={subBrand}>
-            <TableRow className="subgroup-row">
-              <TableCell
-                colSpan={3}
-                className="subgroup-header"
-                style={{ paddingLeft: "16px" }}
-              >
-                <IconButton size="small" onClick={() => toggleGroup(subBrand)}>
-                  {expandedGroups[subBrand] ? <ExpandLess /> : <ExpandMore />}
-                </IconButton>
-                {subBrand}
-              </TableCell>
-            </TableRow>
-            {expandedGroups[subBrand] &&
-              Object.entries(ppgGroups).map(([ppg, items]) => (
-                <React.Fragment key={ppg}>
-                  <TableRow className="ppg-row">
-                    <TableCell
-                      colSpan={3}
-                      className="ppg-header"
-                      style={{ paddingLeft: "32px" }}
-                    >
-                      <IconButton size="small" onClick={() => togglePPG(ppg)}>
-                        {expandedPPGs[ppg] ? <ExpandLess /> : <ExpandMore />}
-                      </IconButton>
-                      {ppg}
-                      <Typography
-                        variant="caption"
-                        component="span"
-                        sx={{ marginLeft: 1, color: "gray" }}
-                      >
-                        ({(items as MockDataItem[]).length})
-                      </Typography>
-                    </TableCell>
-                  </TableRow>
-                  {expandedPPGs[ppg] &&
-                    (items as MockDataItem[]).map((item) => renderRow(item, 2))}
-                </React.Fragment>
-              ))}
-          </React.Fragment>
-        ));
+        return renderSubBrandLevel();
       case "PPG":
-        return Object.entries(groupedData).map(([ppg, items]) => (
-          <React.Fragment key={ppg}>
-            <TableRow className="ppg-row">
-              <TableCell
-                colSpan={3}
-                className="ppg-header"
-                style={{ paddingLeft: "16px" }}
-              >
-                <IconButton size="small" onClick={() => togglePPG(ppg)}>
-                  {expandedPPGs[ppg] ? <ExpandLess /> : <ExpandMore />}
-                </IconButton>
-                {ppg}
-                <Typography
-                  variant="caption"
-                  component="span"
-                  sx={{ marginLeft: 1, color: "gray" }}
-                >
-                  ({(items as MockDataItem[]).length})
-                </Typography>
-              </TableCell>
-            </TableRow>
-            {expandedPPGs[ppg] &&
-              (items as MockDataItem[]).map((item) => renderRow(item, 1))}
-          </React.Fragment>
-        ));
+        return renderPPGLevel();
       case "OSKU":
-        return (groupedData as any).map((item: any) => renderRow(item, 0));
+        return renderOSKULevel();
       default:
         return null;
     }
@@ -227,17 +303,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
       </Typography>
       <TableContainer component={Paper} className="table-container">
         <Table stickyHeader size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell sx={{ ...headerCellStyles }}>Product</TableCell>
-              <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
-                Price Per Pack
-              </TableCell>
-              <TableCell sx={{ ...headerCellStyles, textAlign: "right" }}>
-                Average Volume Per Pack
-              </TableCell>
-            </TableRow>
-          </TableHead>
+          <TableHeader allExpanded={allExpanded} toggleAllGroups={toggleAllGroups} />
           <TableBody>{renderGroupedData()}</TableBody>
         </Table>
       </TableContainer>

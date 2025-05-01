@@ -50,7 +50,7 @@
 }
 
 .group-header {
-  background-color: #f9f9f9; /* MUI primary.light */
+  background-color: #fff; /* MUI primary.light */
   font-family: Roboto, sans-serif;
   color: #ddd; /* MUI primary.main */
   font-weight: 600;
@@ -61,7 +61,7 @@
 }
 
 .subgroup-header {
-  background-color: #f9f9f9; /* MUI secondary.light */
+  background-color: #fff; /* MUI secondary.light */
   font-family: Roboto, sans-serif;
   color: #fff; /* MUI secondary.main */
   font-weight: 500;
@@ -73,7 +73,7 @@
 }
 
 .ppg-header {
-  background-color: #f9f9f9; /* MUI grey[100] */
+  background-color: #fff; /* MUI grey[100] */
   font-family: Roboto, sans-serif;
   color: #000;
   font-size: 0.9rem;
@@ -90,4 +90,104 @@
 .group-row,
 .subgroup-row {
   background-color: #f9f9f9;
+}
+
+/* New styles for grouped column headers */
+.column-group-header {
+  background-color: #f9f9f9;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+  border-bottom: 2px solid #ddd;
+  border-right: 1px solid #ddd;
+}
+
+.price-group {
+  background-color: #f9f9f9;
+}
+
+.volume-group {
+  background-color: #f9f9f9;
+}
+
+.revenue-group {
+  background-color: #f9f9f9;
+}
+
+/* Extracted styles from TableView.tsx */
+/* Header styles */
+.header-cell-base {
+  background-color: #f9f9f9;
+  white-space: nowrap;
+  border: 1px solid #dcdcdc;
+  position: sticky;
+  z-index: 2;
+}
+
+.header-cell {
+  color: gray;
+  font-weight: bold;
+  font-size: 0.8rem;
+  top: 73px;
+}
+
+.group-header-cell {
+  color: #333;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-align: center;
+  top: 0;
+}
+
+.product-header-cell {
+  min-width: 300px;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+/* Body cell styles */
+.body-cell {
+  white-space: nowrap;
+  padding: 6px 20px;
+  font-size: 0.9rem;
+  color: #555;
+  border-right: 1px solid #dcdcdc;
+  font-weight: 600;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.no-bottom-border {
+  border-bottom: none;
+}
+
+/* Group row indentation levels */
+.indent-level-1 {
+  padding-left: 28px;
+}
+
+.indent-level-2 {
+  padding-left: 46px;
+}
+
+.indent-level-3 {
+  padding-left: 64px;
+}
+
+.indent-level-4 {
+  padding-left: 82px;
+}
+
+/* Expand/collapse icon container */
+.product-header-content {
+  display: flex;
+  align-items: center;
+}
+
+.group-count {
+  margin-left: 8px;
+  color: gray;
 }
