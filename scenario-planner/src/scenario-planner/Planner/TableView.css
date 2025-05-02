@@ -181,6 +181,10 @@
   padding-left: 82px;
 }
 
+.indent-level-5 {
+  padding-left: 100px;
+}
+
 /* Expand/collapse icon container */
 .product-header-content {
   display: flex;
@@ -190,4 +194,36 @@
 .group-count {
   margin-left: 8px;
   color: gray;
+}
+
+/* OSKU and PromoType specific styles */
+.osku-row {
+  background-color: #f5f5f5;
+}
+
+.promo-chip {
+  margin-right: 8px;
+  min-width: 80px;
+  font-size: 0.75rem !important;
+}
+
+/* Override MUI Chip colors for better visibility */
+.MuiChip-colorDefault {
+  background-color: #e0e0e0 !important;
+  color: #424242 !important;
+}
+
+.MuiChip-colorPrimary {
+  background-color: #bbdefb !important;
+  color: #0d47a1 !important;
+}
+
+.MuiChip-colorSecondary {
+  background-color: #f8bbd0 !important;
+  color: #880e4f !important;
+}
+
+.MuiChip-colorError {
+  background-color: #ffcdd2 !important;
+  color: #b71c1c !important;
 }

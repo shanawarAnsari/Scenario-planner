@@ -17,12 +17,14 @@ export interface MockDataItem {
   r: number;
   ra: number;
   deltaRev: number;
+  promoType: string;
 }
 
 export type GroupLevel = "Brand" | "SubBrand" | "PPG" | "OSKU";
 
 // Type definitions for grouped data structures
-export type GroupedByPPG = Record<string, MockDataItem[]>;
+export type GroupedByOSKU = Record<string, MockDataItem[]>;
+export type GroupedByPPG = Record<string, GroupedByOSKU>;
 export type GroupedBySubBrand = Record<string, GroupedByPPG>;
 export type GroupedByBrand = Record<string, GroupedBySubBrand>;
 
@@ -31,6 +33,7 @@ export type GroupedData =
   | GroupedByBrand
   | GroupedBySubBrand
   | GroupedByPPG
+  | GroupedByOSKU
   | MockDataItem[];
 
 // Create utility function outside of hooks to avoid react-hooks/rules-of-hooks error
@@ -45,6 +48,7 @@ export const useTableData = (level: GroupLevel) => {
     Record<string, boolean>
   >({});
   const [expandedPPGs, setExpandedPPGs] = useState<Record<string, boolean>>({});
+  const [expandedOSKUs, setExpandedOSKUs] = useState<Record<string, boolean>>({});
 
   // Toggle functions
   const toggleGroup = (id: string) => {
@@ -57,6 +61,10 @@ export const useTableData = (level: GroupLevel) => {
 
   const togglePPG = (id: string) => {
     setExpandedPPGs((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleOSKU = (id: string) => {
+    setExpandedOSKUs((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   // Batch update functions
@@ -72,6 +80,10 @@ export const useTableData = (level: GroupLevel) => {
     setExpandedPPGs((prev) => ({ ...prev, ...newState }));
   };
 
+  const setOSKUsBatch = (newState: Record<string, boolean>) => {
+    setExpandedOSKUs((prev) => ({ ...prev, ...newState }));
+  };
+
   // Group data based on the selected level
   const groupedData: GroupedData = useMemo(() => {
     switch (level) {
@@ -81,30 +93,39 @@ export const useTableData = (level: GroupLevel) => {
           if (!acc[item.brd]) acc[item.brd] = {};
           if (!acc[item.brd][item.subBrd]) acc[item.brd][item.subBrd] = {};
           if (!acc[item.brd][item.subBrd][item.ppg])
-            acc[item.brd][item.subBrd][item.ppg] = [];
+            acc[item.brd][item.subBrd][item.ppg] = {};
+          if (!acc[item.brd][item.subBrd][item.ppg][item.osku])
+            acc[item.brd][item.subBrd][item.ppg][item.osku] = [];
 
           // Add the item to the appropriate group
-          acc[item.brd][item.subBrd][item.ppg].push(item);
+          acc[item.brd][item.subBrd][item.ppg][item.osku].push(item);
           return acc;
         }, {} as GroupedByBrand);
 
       case "SubBrand":
         return resultsData.reduce((acc, item) => {
           if (!acc[item.subBrd]) acc[item.subBrd] = {};
-          if (!acc[item.subBrd][item.ppg]) acc[item.subBrd][item.ppg] = [];
-          acc[item.subBrd][item.ppg].push(item);
+          if (!acc[item.subBrd][item.ppg]) acc[item.subBrd][item.ppg] = {};
+          if (!acc[item.subBrd][item.ppg][item.osku])
+            acc[item.subBrd][item.ppg][item.osku] = [];
+          acc[item.subBrd][item.ppg][item.osku].push(item);
           return acc;
         }, {} as GroupedBySubBrand);
 
       case "PPG":
         return resultsData.reduce((acc, item) => {
-          if (!acc[item.ppg]) acc[item.ppg] = [];
-          acc[item.ppg].push(item);
+          if (!acc[item.ppg]) acc[item.ppg] = {};
+          if (!acc[item.ppg][item.osku]) acc[item.ppg][item.osku] = [];
+          acc[item.ppg][item.osku].push(item);
           return acc;
         }, {} as GroupedByPPG);
 
       case "OSKU":
-        return resultsData;
+        return resultsData.reduce((acc, item) => {
+          if (!acc[item.osku]) acc[item.osku] = [];
+          acc[item.osku].push(item);
+          return acc;
+        }, {} as GroupedByOSKU);
 
       default:
         return {};
@@ -124,11 +145,16 @@ export const useTableData = (level: GroupLevel) => {
     return level === "PPG";
   };
 
+  const isOSKULevel = (data: GroupedData): data is GroupedByOSKU => {
+    return level === "OSKU";
+  };
+
   // Utility functions for bulk operations
   const expandAll = () => {
     const groups: Record<string, boolean> = {};
     const subGroups: Record<string, boolean> = {};
     const ppgs: Record<string, boolean> = {};
+    const oskus: Record<string, boolean> = {};
 
     // Extract all keys from the grouped data based on level
     if (isBrandLevel(groupedData)) {
@@ -142,6 +168,11 @@ export const useTableData = (level: GroupLevel) => {
           const subBrandData = brandData[subBrand];
           Object.keys(subBrandData).forEach((ppg) => {
             ppgs[ppg] = true;
+
+            const ppgData = subBrandData[ppg];
+            Object.keys(ppgData).forEach((osku) => {
+              oskus[osku] = true;
+            });
           });
         });
       });
@@ -152,11 +183,25 @@ export const useTableData = (level: GroupLevel) => {
         const subBrandData = groupedData[subBrand];
         Object.keys(subBrandData).forEach((ppg) => {
           ppgs[ppg] = true;
+
+          const ppgData = subBrandData[ppg];
+          Object.keys(ppgData).forEach((osku) => {
+            oskus[osku] = true;
+          });
         });
       });
     } else if (isPPGLevel(groupedData)) {
       Object.keys(groupedData).forEach((ppg) => {
         ppgs[ppg] = true;
+
+        const ppgData = groupedData[ppg];
+        Object.keys(ppgData).forEach((osku) => {
+          oskus[osku] = true;
+        });
+      });
+    } else if (isOSKULevel(groupedData)) {
+      Object.keys(groupedData).forEach((osku) => {
+        oskus[osku] = true;
       });
     }
 
@@ -164,12 +209,14 @@ export const useTableData = (level: GroupLevel) => {
     setGroupsBatch(groups);
     setSubGroupsBatch(subGroups);
     setPPGsBatch(ppgs);
+    setOSKUsBatch(oskus);
   };
 
   const collapseAll = () => {
     const groups: Record<string, boolean> = {};
     const subGroups: Record<string, boolean> = {};
     const ppgs: Record<string, boolean> = {};
+    const oskus: Record<string, boolean> = {};
 
     // Extract all keys from the grouped data based on level
     if (isBrandLevel(groupedData)) {
@@ -183,6 +230,11 @@ export const useTableData = (level: GroupLevel) => {
           const subBrandData = brandData[subBrand];
           Object.keys(subBrandData).forEach((ppg) => {
             ppgs[ppg] = false;
+
+            const ppgData = subBrandData[ppg];
+            Object.keys(ppgData).forEach((osku) => {
+              oskus[osku] = false;
+            });
           });
         });
       });
@@ -193,11 +245,25 @@ export const useTableData = (level: GroupLevel) => {
         const subBrandData = groupedData[subBrand];
         Object.keys(subBrandData).forEach((ppg) => {
           ppgs[ppg] = false;
+
+          const ppgData = subBrandData[ppg];
+          Object.keys(ppgData).forEach((osku) => {
+            oskus[osku] = false;
+          });
         });
       });
     } else if (isPPGLevel(groupedData)) {
       Object.keys(groupedData).forEach((ppg) => {
         ppgs[ppg] = false;
+
+        const ppgData = groupedData[ppg];
+        Object.keys(ppgData).forEach((osku) => {
+          oskus[osku] = false;
+        });
+      });
+    } else if (isOSKULevel(groupedData)) {
+      Object.keys(groupedData).forEach((osku) => {
+        oskus[osku] = false;
       });
     }
 
@@ -205,6 +271,7 @@ export const useTableData = (level: GroupLevel) => {
     setGroupsBatch(groups);
     setSubGroupsBatch(subGroups);
     setPPGsBatch(ppgs);
+    setOSKUsBatch(oskus);
   };
 
   return {
@@ -212,9 +279,11 @@ export const useTableData = (level: GroupLevel) => {
     expandedGroups,
     expandedSubGroups,
     expandedPPGs,
+    expandedOSKUs,
     toggleGroup,
     toggleSubGroup,
     togglePPG,
+    toggleOSKU,
     expandAll,
     collapseAll,
   };

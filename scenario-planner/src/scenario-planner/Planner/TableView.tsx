@@ -11,6 +11,7 @@ import {
   Box,
   IconButton,
   Tooltip,
+  Chip,
 } from "@mui/material";
 import { ExpandMore, ExpandLess, UnfoldMore, UnfoldLess } from "@mui/icons-material";
 import {
@@ -20,24 +21,67 @@ import {
   GroupedByBrand,
   GroupedBySubBrand,
   GroupedByPPG,
+  GroupedByOSKU,
 } from "./hooks/useTableData";
 import "./TableView.css";
 
-// Props interfacS
+// Props interface
 interface TableViewProps {
   level: GroupLevel;
 }
 
-// Extracted row component for better readability
-const DataRow: React.FC<{ item: MockDataItem; indentLevel: number }> = ({
-  item,
-  indentLevel,
-}) => {
-  const indentClass = `indent-level-${indentLevel}`;
+// PromoType component to display promo type with appropriate styling
+const PromoTypeChip: React.FC<{ promoType: string }> = ({ promoType }) => {
+  let color:
+    | "default"
+    | "primary"
+    | "secondary"
+    | "error"
+    | "info"
+    | "success"
+    | "warning" = "default";
+
+  switch (promoType) {
+    case "Display":
+      color = "primary";
+      break;
+    case "Feature":
+      color = "secondary";
+      break;
+    case "Discount":
+      color = "error";
+      break;
+    case "No Promo":
+    default:
+      color = "default";
+  }
 
   return (
+    <Chip
+      sx={{ borderRadius: "4px" }}
+      label={promoType}
+      color={color}
+      size="small"
+      className="promo-chip"
+    />
+  );
+};
+
+// Extracted row component for better readability
+const DataRow: React.FC<{
+  item: MockDataItem;
+  indentLevel: number;
+  showPromoType?: boolean;
+}> = ({ item, indentLevel, showPromoType = true }) => {
+  return (
     <TableRow key={item.pid} className="table-row">
-      <TableCell className={`body-cell ${indentClass}`}>{item.osku}</TableCell>
+      <TableCell
+        className={`body-cell`}
+        sx={{ paddingLeft: `${indentLevel * 23}px` }}
+      >
+        {showPromoType && <PromoTypeChip promoType={item.promoType} />}
+        {!showPromoType && item.osku}
+      </TableCell>
       <TableCell className="body-cell text-right">{item.ppk.toFixed(2)}</TableCell>
       <TableCell className="body-cell text-right">{item.ppka.toFixed(2)}</TableCell>
       <TableCell className="body-cell text-right">
@@ -62,8 +106,9 @@ const GroupRow: React.FC<{
   onToggle: (id: string) => void;
   paddingLeft?: number;
   itemCount?: number;
-}> = ({ id, isExpanded, onToggle, paddingLeft = 16, itemCount }) => (
-  <TableRow className="group-row">
+  className?: string;
+}> = ({ id, isExpanded, onToggle, paddingLeft = 16, itemCount, className }) => (
+  <TableRow className={`group-row ${className || ""}`}>
     <TableCell
       colSpan={10}
       className="group-header"
@@ -164,9 +209,11 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
     expandedGroups,
     expandedSubGroups,
     expandedPPGs,
+    expandedOSKUs,
     toggleGroup,
     toggleSubGroup,
     togglePPG,
+    toggleOSKU,
     expandAll,
     collapseAll,
   } = useTableData(level);
@@ -204,18 +251,32 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                 paddingLeft={32}
               />
               {expandedSubGroups[subBrand] &&
-                Object.entries(ppgGroups).map(([ppg, items]) => (
+                Object.entries(ppgGroups).map(([ppg, oskuGroups]) => (
                   <React.Fragment key={ppg}>
                     <GroupRow
                       id={ppg}
                       isExpanded={expandedPPGs[ppg]}
                       onToggle={togglePPG}
                       paddingLeft={48}
-                      itemCount={items.length}
                     />
                     {expandedPPGs[ppg] &&
-                      items.map((item) => (
-                        <DataRow key={item.pid} item={item} indentLevel={3} />
+                      typeof oskuGroups === "object" &&
+                      !Array.isArray(oskuGroups) &&
+                      Object.entries(oskuGroups).map(([osku, items]) => (
+                        <React.Fragment key={osku}>
+                          <GroupRow
+                            id={osku}
+                            isExpanded={expandedOSKUs[osku]}
+                            onToggle={toggleOSKU}
+                            paddingLeft={64}
+                            itemCount={items.length}
+                            className="osku-row"
+                          />
+                          {expandedOSKUs[osku] &&
+                            items.map((item) => (
+                              <DataRow key={item.pid} item={item} indentLevel={4} />
+                            ))}
+                        </React.Fragment>
                       ))}
                   </React.Fragment>
                 ))}
@@ -236,18 +297,32 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
           paddingLeft={16}
         />
         {expandedGroups[subBrand] &&
-          Object.entries(ppgGroups).map(([ppg, items]) => (
+          Object.entries(ppgGroups).map(([ppg, oskuGroups]) => (
             <React.Fragment key={ppg}>
               <GroupRow
                 id={ppg}
                 isExpanded={expandedPPGs[ppg]}
                 onToggle={togglePPG}
                 paddingLeft={32}
-                itemCount={items.length}
               />
               {expandedPPGs[ppg] &&
-                items.map((item) => (
-                  <DataRow key={item.pid} item={item} indentLevel={2} />
+                typeof oskuGroups === "object" &&
+                !Array.isArray(oskuGroups) &&
+                Object.entries(oskuGroups).map(([osku, items]) => (
+                  <React.Fragment key={osku}>
+                    <GroupRow
+                      id={osku}
+                      isExpanded={expandedOSKUs[osku]}
+                      onToggle={toggleOSKU}
+                      paddingLeft={48}
+                      itemCount={items.length}
+                      className="osku-row"
+                    />
+                    {expandedOSKUs[osku] &&
+                      items.map((item) => (
+                        <DataRow key={item.pid} item={item} indentLevel={3} />
+                      ))}
+                  </React.Fragment>
                 ))}
             </React.Fragment>
           ))}
@@ -257,26 +332,54 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
 
   const renderPPGLevel = () => {
     const data = groupedData as GroupedByPPG;
-    return Object.entries(data).map(([ppg, items]) => (
+    return Object.entries(data).map(([ppg, oskuGroups]) => (
       <React.Fragment key={ppg}>
         <GroupRow
           id={ppg}
           isExpanded={expandedPPGs[ppg]}
           onToggle={togglePPG}
           paddingLeft={16}
-          itemCount={items.length}
         />
         {expandedPPGs[ppg] &&
-          items.map((item) => (
-            <DataRow key={item.pid} item={item} indentLevel={1} />
+          typeof oskuGroups === "object" &&
+          !Array.isArray(oskuGroups) &&
+          Object.entries(oskuGroups).map(([osku, items]) => (
+            <React.Fragment key={osku}>
+              <GroupRow
+                id={osku}
+                isExpanded={expandedOSKUs[osku]}
+                onToggle={toggleOSKU}
+                paddingLeft={32}
+                itemCount={items.length}
+                className="osku-row"
+              />
+              {expandedOSKUs[osku] &&
+                items.map((item) => (
+                  <DataRow key={item.pid} item={item} indentLevel={2} />
+                ))}
+            </React.Fragment>
           ))}
       </React.Fragment>
     ));
   };
 
   const renderOSKULevel = () => {
-    return (groupedData as MockDataItem[]).map((item) => (
-      <DataRow key={item.pid} item={item} indentLevel={0} />
+    const data = groupedData as GroupedByOSKU;
+    return Object.entries(data).map(([osku, items]) => (
+      <React.Fragment key={osku}>
+        <GroupRow
+          id={osku}
+          isExpanded={expandedOSKUs[osku]}
+          onToggle={toggleOSKU}
+          paddingLeft={16}
+          itemCount={items.length}
+          className="osku-row"
+        />
+        {expandedOSKUs[osku] &&
+          items.map((item) => (
+            <DataRow key={item.pid} item={item} indentLevel={1} />
+          ))}
+      </React.Fragment>
     ));
   };
 
