@@ -76,39 +76,34 @@ const DataRow: React.FC<{
   indentLevel: number;
   showPromoType?: boolean;
 }> = ({ item, indentLevel, showPromoType = true }) => {
-  const rowClass = `item-row item-row-indent-${indentLevel}`;
-  const paddingLeft = `${indentLevel * 24 + 28}px`;
+  const paddingLeft = `${indentLevel * 24}px`;
 
   return (
-    <TableRow key={item.pid} className={rowClass}>
+    <TableRow key={item.pid}>
       <TableCell sx={{ paddingLeft }}>
         {showPromoType && <span>{item.promoType}</span>}
         {!showPromoType && item.osku}
       </TableCell>
       <TableCell>{item.ppk.toFixed(2)}</TableCell>
       <TableCell>{item.ppka.toFixed(2)}</TableCell>
-      <TableCell className="delta-cell">{formatDeltaValue(item.deltaPpk)}</TableCell>
+      <TableCell>{formatDeltaValue(item.deltaPpk)}</TableCell>
       <TableCell>{item.vpk.toLocaleString()}</TableCell>
       <TableCell>{item.vpka.toLocaleString()}</TableCell>
-      <TableCell className="delta-cell">
-        {formatDeltaValue(item.deltaVpk, true)}
-      </TableCell>
+      <TableCell>{formatDeltaValue(item.deltaVpk, true)}</TableCell>
       <TableCell>
         {item.r.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </TableCell>
       <TableCell>
         {item.ra.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </TableCell>
-      <TableCell className="delta-cell">
-        {formatDeltaValue(item.deltaRev, true)}
-      </TableCell>
+      <TableCell>{formatDeltaValue(item.deltaRev, true)}</TableCell>
       <TableCell>
         {item.pb.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </TableCell>
       <TableCell>
         {item.pa.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </TableCell>
-      <TableCell className="delta-cell">{formatDeltaValue(item.pd, true)}</TableCell>
+      <TableCell>{formatDeltaValue(item.pd, true)}</TableCell>
     </TableRow>
   );
 };
@@ -123,7 +118,7 @@ const GroupRow: React.FC<{
   const paddingLeft = `${indentLevel * 24}px`;
 
   return (
-    <TableRow className="group-row">
+    <TableRow>
       <TableCell colSpan={13} sx={{ paddingLeft }}>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <IconButton size="small" onClick={() => onToggle(id)}>
@@ -393,72 +388,56 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
           <TableHeader allExpanded={allExpanded} toggleAllGroups={toggleAllGroups} />
           <TableBody>
             {/* Total row at the top of the table - Using hardcoded values */}
-            <TableRow className="total-row">
+            <TableRow>
               <TableCell align={"right"} colSpan={1}>
                 <Typography variant="subtitle1" sx={{ fontSize: "0.9rem" }}>
                   Total
                 </Typography>
               </TableCell>
               <TableCell>
-                <span className="total-value">{totals.avgPpk.toFixed(2)}</span>
+                <span>{totals.avgPpk.toFixed(2)}</span>
               </TableCell>
               <TableCell>
-                <span className="total-value">{totals.avgPpka.toFixed(2)}</span>
+                <span>{totals.avgPpka.toFixed(2)}</span>
               </TableCell>
-              <TableCell className="delta-cell">
-                {formatDeltaValue(totals.deltaPpk)}{" "}
-                {/* Delta calculation is now hardcoded */}
+              <TableCell>{formatDeltaValue(totals.deltaPpk)}</TableCell>
+              <TableCell>
+                <span>{totals.totalVpk.toLocaleString()}</span>
               </TableCell>
               <TableCell>
-                <span className="total-value">
-                  {totals.totalVpk.toLocaleString()}
-                </span>
+                <span>{totals.totalVpka.toLocaleString()}</span>
               </TableCell>
+              <TableCell>{formatDeltaValue(totals.deltaVpk, true)}</TableCell>
               <TableCell>
-                <span className="total-value">
-                  {totals.totalVpka.toLocaleString()}
-                </span>
-              </TableCell>
-              <TableCell className="delta-cell">
-                {formatDeltaValue(totals.deltaVpk, true)}{" "}
-                {/* Delta calculation is now hardcoded */}
-              </TableCell>
-              <TableCell>
-                <span className="total-value">
+                <span>
                   {totals.totalRev.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
               <TableCell>
-                <span className="total-value">
+                <span>
                   {totals.totalRevA.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
-              <TableCell className="delta-cell">
-                {formatDeltaValue(totals.deltaRev, true)}{" "}
-                {/* Delta calculation is now hardcoded */}
-              </TableCell>
+              <TableCell>{formatDeltaValue(totals.deltaRev, true)}</TableCell>
               <TableCell>
-                <span className="total-value">
+                <span>
                   {totals.totalProfit.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
               <TableCell>
-                <span className="total-value">
+                <span>
                   {totals.totalProfitA.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
-              <TableCell className="delta-cell">
-                {formatDeltaValue(totals.deltaProfit, true)}{" "}
-                {/* Delta calculation is now hardcoded */}
-              </TableCell>
+              <TableCell>{formatDeltaValue(totals.deltaProfit, true)}</TableCell>
             </TableRow>
 
             {/* Grouped data rows */}
