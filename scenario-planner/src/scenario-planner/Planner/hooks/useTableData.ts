@@ -45,46 +45,20 @@ const createStateObject = (initialState: Record<string, boolean> = {}) => {
 };
 
 export const useTableData = (level: GroupLevel) => {
-  // Use separate useState hooks for each expansion state
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
-  const [expandedSubGroups, setExpandedSubGroups] = useState<
-    Record<string, boolean>
-  >({});
-  const [expandedPPGs, setExpandedPPGs] = useState<Record<string, boolean>>({});
-  const [expandedOSKUs, setExpandedOSKUs] = useState<Record<string, boolean>>({});
+  // Single state object for managing expansion of all levels
+  const [expansionState, setExpansionState] = useState<Record<string, boolean>>({});
 
-  // Toggle functions
-  const toggleGroup = (id: string) => {
-    setExpandedGroups((prev) => ({ ...prev, [id]: !prev[id] }));
+  // Unified toggle function
+  const toggleExpansion = (id: string) => {
+    setExpansionState((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
-  const toggleSubGroup = (id: string) => {
-    setExpandedSubGroups((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const togglePPG = (id: string) => {
-    setExpandedPPGs((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const toggleOSKU = (id: string) => {
-    setExpandedOSKUs((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  // Batch update functions
-  const setGroupsBatch = (newState: Record<string, boolean>) => {
-    setExpandedGroups((prev) => ({ ...prev, ...newState }));
-  };
-
-  const setSubGroupsBatch = (newState: Record<string, boolean>) => {
-    setExpandedSubGroups((prev) => ({ ...prev, ...newState }));
-  };
-
-  const setPPGsBatch = (newState: Record<string, boolean>) => {
-    setExpandedPPGs((prev) => ({ ...prev, ...newState }));
-  };
-
-  const setOSKUsBatch = (newState: Record<string, boolean>) => {
-    setExpandedOSKUs((prev) => ({ ...prev, ...newState }));
+  // Batch update function for the single state
+  const setExpansionStateBatch = (newState: Record<string, boolean>) => {
+    setExpansionState((prev) => ({ ...prev, ...newState }));
   };
 
   // Group data based on the selected level
@@ -154,139 +128,63 @@ export const useTableData = (level: GroupLevel) => {
 
   // Utility functions for bulk operations
   const expandAll = () => {
-    const groups: Record<string, boolean> = {};
-    const subGroups: Record<string, boolean> = {};
-    const ppgs: Record<string, boolean> = {};
-    const oskus: Record<string, boolean> = {};
+    const allKeysToExpand: Record<string, boolean> = {};
 
-    // Extract all keys from the grouped data based on level
-    if (isBrandLevel(groupedData)) {
-      Object.keys(groupedData).forEach((brand) => {
-        groups[brand] = true;
+    // Function to recursively find all keys
+    const findAllKeys = (data: any, currentLevel: number) => {
+      if (typeof data !== "object" || data === null || currentLevel > 4) {
+        return;
+      }
 
-        const brandData = groupedData[brand];
-        Object.keys(brandData).forEach((subBrand) => {
-          subGroups[subBrand] = true;
-
-          const subBrandData = brandData[subBrand];
-          Object.keys(subBrandData).forEach((ppg) => {
-            ppgs[ppg] = true;
-
-            const ppgData = subBrandData[ppg];
-            Object.keys(ppgData).forEach((osku) => {
-              oskus[osku] = true;
-            });
-          });
-        });
+      Object.keys(data).forEach((key) => {
+        // Add the key for the current group level
+        allKeysToExpand[key] = true;
+        // Recurse into the next level
+        if (!Array.isArray(data[key])) {
+          // Don't recurse into the final array of items
+          findAllKeys(data[key], currentLevel + 1);
+        }
       });
-    } else if (isSubBrandLevel(groupedData)) {
-      Object.keys(groupedData).forEach((subBrand) => {
-        groups[subBrand] = true;
+    };
 
-        const subBrandData = groupedData[subBrand];
-        Object.keys(subBrandData).forEach((ppg) => {
-          ppgs[ppg] = true;
+    // Start recursion from the top level of groupedData
+    findAllKeys(groupedData, 0);
 
-          const ppgData = subBrandData[ppg];
-          Object.keys(ppgData).forEach((osku) => {
-            oskus[osku] = true;
-          });
-        });
-      });
-    } else if (isPPGLevel(groupedData)) {
-      Object.keys(groupedData).forEach((ppg) => {
-        ppgs[ppg] = true;
-
-        const ppgData = groupedData[ppg];
-        Object.keys(ppgData).forEach((osku) => {
-          oskus[osku] = true;
-        });
-      });
-    } else if (isOSKULevel(groupedData)) {
-      Object.keys(groupedData).forEach((osku) => {
-        oskus[osku] = true;
-      });
-    }
-
-    // Update all states at once
-    setGroupsBatch(groups);
-    setSubGroupsBatch(subGroups);
-    setPPGsBatch(ppgs);
-    setOSKUsBatch(oskus);
+    // Update the single state object
+    setExpansionStateBatch(allKeysToExpand);
   };
 
   const collapseAll = () => {
-    const groups: Record<string, boolean> = {};
-    const subGroups: Record<string, boolean> = {};
-    const ppgs: Record<string, boolean> = {};
-    const oskus: Record<string, boolean> = {};
+    const allKeysToCollapse: Record<string, boolean> = {};
 
-    // Extract all keys from the grouped data based on level
-    if (isBrandLevel(groupedData)) {
-      Object.keys(groupedData).forEach((brand) => {
-        groups[brand] = false;
+    // Function to recursively find all keys
+    const findAllKeys = (data: any, currentLevel: number) => {
+      if (typeof data !== "object" || data === null || currentLevel > 4) {
+        return;
+      }
 
-        const brandData = groupedData[brand];
-        Object.keys(brandData).forEach((subBrand) => {
-          subGroups[subBrand] = false;
-
-          const subBrandData = brandData[subBrand];
-          Object.keys(subBrandData).forEach((ppg) => {
-            ppgs[ppg] = false;
-
-            const ppgData = subBrandData[ppg];
-            Object.keys(ppgData).forEach((osku) => {
-              oskus[osku] = false;
-            });
-          });
-        });
+      Object.keys(data).forEach((key) => {
+        // Add the key for the current group level
+        allKeysToCollapse[key] = false; // Set to false for collapsing
+        // Recurse into the next level
+        if (!Array.isArray(data[key])) {
+          // Don't recurse into the final array of items
+          findAllKeys(data[key], currentLevel + 1);
+        }
       });
-    } else if (isSubBrandLevel(groupedData)) {
-      Object.keys(groupedData).forEach((subBrand) => {
-        groups[subBrand] = false;
+    };
 
-        const subBrandData = groupedData[subBrand];
-        Object.keys(subBrandData).forEach((ppg) => {
-          ppgs[ppg] = false;
+    // Start recursion from the top level of groupedData
+    findAllKeys(groupedData, 0);
 
-          const ppgData = subBrandData[ppg];
-          Object.keys(ppgData).forEach((osku) => {
-            oskus[osku] = false;
-          });
-        });
-      });
-    } else if (isPPGLevel(groupedData)) {
-      Object.keys(groupedData).forEach((ppg) => {
-        ppgs[ppg] = false;
-
-        const ppgData = groupedData[ppg];
-        Object.keys(ppgData).forEach((osku) => {
-          oskus[osku] = false;
-        });
-      });
-    } else if (isOSKULevel(groupedData)) {
-      Object.keys(groupedData).forEach((osku) => {
-        oskus[osku] = false;
-      });
-    }
-
-    // Update all states at once
-    setGroupsBatch(groups);
-    setSubGroupsBatch(subGroups);
-    setPPGsBatch(ppgs);
-    setOSKUsBatch(oskus);
+    // Update the single state object
+    setExpansionStateBatch(allKeysToCollapse);
   };
 
   return {
     groupedData,
-    expandedGroups,
-    expandedSubGroups,
-    expandedPPGs,
-    expandedOSKUs,
-    toggleGroup,
-    toggleSubGroup,
-    togglePPG,
-    toggleOSKU,
+    expansionState, // Return the single state object
+    toggleExpansion, // Return the unified toggle function
     expandAll,
     collapseAll,
   };

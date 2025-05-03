@@ -186,19 +186,8 @@ const TableHeader: React.FC<{
 
 // Main TableView component
 const TableView: React.FC<TableViewProps> = ({ level }) => {
-  const {
-    groupedData,
-    expandedGroups,
-    expandedSubGroups,
-    expandedPPGs,
-    expandedOSKUs,
-    toggleGroup,
-    toggleSubGroup,
-    togglePPG,
-    toggleOSKU,
-    expandAll,
-    collapseAll,
-  } = useTableData(level);
+  const { groupedData, expansionState, toggleExpansion, expandAll, collapseAll } =
+    useTableData(level);
 
   const [allExpanded, setAllExpanded] = useState(false);
   const totals = {
@@ -234,40 +223,40 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
       <React.Fragment key={brand}>
         <GroupRow
           id={brand}
-          isExpanded={expandedGroups[brand]}
-          onToggle={toggleGroup}
+          isExpanded={!!expansionState[brand]}
+          onToggle={toggleExpansion}
           indentLevel={0}
         />
-        {expandedGroups[brand] &&
+        {expansionState[brand] &&
           Object.entries(subGroups).map(([subBrand, ppgGroups]) => (
             <React.Fragment key={subBrand}>
               <GroupRow
                 id={subBrand}
-                isExpanded={expandedSubGroups[subBrand]}
-                onToggle={toggleSubGroup}
+                isExpanded={!!expansionState[subBrand]}
+                onToggle={toggleExpansion}
                 indentLevel={1}
               />
-              {expandedSubGroups[subBrand] &&
+              {expansionState[subBrand] &&
                 Object.entries(ppgGroups).map(([ppg, oskuGroups]) => (
                   <React.Fragment key={ppg}>
                     <GroupRow
                       id={ppg}
-                      isExpanded={expandedPPGs[ppg]}
-                      onToggle={togglePPG}
+                      isExpanded={!!expansionState[ppg]}
+                      onToggle={toggleExpansion}
                       indentLevel={2}
                     />
-                    {expandedPPGs[ppg] &&
+                    {expansionState[ppg] &&
                       typeof oskuGroups === "object" &&
                       !Array.isArray(oskuGroups) &&
                       Object.entries(oskuGroups).map(([osku, items]) => (
                         <React.Fragment key={osku}>
                           <GroupRow
                             id={osku}
-                            isExpanded={expandedOSKUs[osku]}
-                            onToggle={toggleOSKU}
+                            isExpanded={!!expansionState[osku]}
+                            onToggle={toggleExpansion}
                             indentLevel={3}
                           />
-                          {expandedOSKUs[osku] &&
+                          {expansionState[osku] &&
                             sortByPromoType(items).map((item) => (
                               <DataRow key={item.pid} item={item} indentLevel={4} />
                             ))}
@@ -287,31 +276,31 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
       <React.Fragment key={subBrand}>
         <GroupRow
           id={subBrand}
-          isExpanded={expandedGroups[subBrand]}
-          onToggle={toggleGroup}
+          isExpanded={!!expansionState[subBrand]}
+          onToggle={toggleExpansion}
           indentLevel={0}
         />
-        {expandedGroups[subBrand] &&
+        {expansionState[subBrand] &&
           Object.entries(ppgGroups).map(([ppg, oskuGroups]) => (
             <React.Fragment key={ppg}>
               <GroupRow
                 id={ppg}
-                isExpanded={expandedPPGs[ppg]}
-                onToggle={togglePPG}
+                isExpanded={!!expansionState[ppg]}
+                onToggle={toggleExpansion}
                 indentLevel={1}
               />
-              {expandedPPGs[ppg] &&
+              {expansionState[ppg] &&
                 typeof oskuGroups === "object" &&
                 !Array.isArray(oskuGroups) &&
                 Object.entries(oskuGroups).map(([osku, items]) => (
                   <React.Fragment key={osku}>
                     <GroupRow
                       id={osku}
-                      isExpanded={expandedOSKUs[osku]}
-                      onToggle={toggleOSKU}
+                      isExpanded={!!expansionState[osku]}
+                      onToggle={toggleExpansion}
                       indentLevel={2}
                     />
-                    {expandedOSKUs[osku] &&
+                    {expansionState[osku] &&
                       sortByPromoType(items).map((item) => (
                         <DataRow key={item.pid} item={item} indentLevel={3} />
                       ))}
@@ -329,22 +318,22 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
       <React.Fragment key={ppg}>
         <GroupRow
           id={ppg}
-          isExpanded={expandedPPGs[ppg]}
-          onToggle={togglePPG}
+          isExpanded={!!expansionState[ppg]}
+          onToggle={toggleExpansion}
           indentLevel={0}
         />
-        {expandedPPGs[ppg] &&
+        {expansionState[ppg] &&
           typeof oskuGroups === "object" &&
           !Array.isArray(oskuGroups) &&
           Object.entries(oskuGroups).map(([osku, items]) => (
             <React.Fragment key={osku}>
               <GroupRow
                 id={osku}
-                isExpanded={expandedOSKUs[osku]}
-                onToggle={toggleOSKU}
+                isExpanded={!!expansionState[osku]}
+                onToggle={toggleExpansion}
                 indentLevel={1}
               />
-              {expandedOSKUs[osku] &&
+              {expansionState[osku] &&
                 sortByPromoType(items).map((item) => (
                   <DataRow key={item.pid} item={item} indentLevel={2} />
                 ))}
@@ -360,11 +349,11 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
       <React.Fragment key={osku}>
         <GroupRow
           id={osku}
-          isExpanded={expandedOSKUs[osku]}
-          onToggle={toggleOSKU}
+          isExpanded={!!expansionState[osku]}
+          onToggle={toggleExpansion}
           indentLevel={0}
         />
-        {expandedOSKUs[osku] &&
+        {expansionState[osku] &&
           sortByPromoType(items).map((item) => (
             <DataRow key={item.pid} item={item} indentLevel={1} />
           ))}
