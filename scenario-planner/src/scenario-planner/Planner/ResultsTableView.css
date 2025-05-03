@@ -1,0 +1,117 @@
+/* ResultsTableView.css */
+
+.table-container {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.06);
+  padding: 24px 0 0 0;
+}
+
+.scenario-table {
+  border-radius: 16px;
+  overflow: hidden;
+  background: #ffffff;
+  color: #1f2937;
+  font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
+  font-size: 0.98rem;
+}
+
+.MuiTableCell-root {
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.MuiTableHead-root .MuiTableCell-root {
+  background: #f9fafb;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+.MuiTableRow-root.group-row {
+  background: #f8fafc;
+  font-weight: 500;
+  color: #334155;
+}
+
+.MuiTableRow-root.group-row .MuiTableCell-root {
+  font-size: 0.95rem;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.MuiTableRow-root.data-row {
+  background: #ffffff;
+  transition: background 0.15s ease;
+}
+
+.MuiTableRow-root.data-row:hover {
+  background: #f1f5f9;
+}
+
+.MuiTableRow-root.total-row {
+  background: #f1f5f9;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Indentation for group and data rows */
+.group-indent-0 {
+  padding-left: 12px !important;
+}
+.group-indent-1 {
+  padding-left: 36px !important;
+}
+.group-indent-2 {
+  padding-left: 60px !important;
+}
+.group-indent-3 {
+  padding-left: 84px !important;
+}
+.group-indent-4 {
+  padding-left: 108px !important;
+}
+.data-indent-1 {
+  padding-left: 60px !important;
+}
+.data-indent-2 {
+  padding-left: 84px !important;
+}
+.data-indent-3 {
+  padding-left: 108px !important;
+}
+.data-indent-4 {
+  padding-left: 132px !important;
+}
+
+/* Icon button tweaks */
+.MuiIconButton-root {
+  color: #64748b;
+  background: transparent;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.MuiIconButton-root:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+/* Typography tweaks */
+.scenario-table .MuiTypography-root {
+  font-size: 0.95rem;
+}
+
+/* Arrow icons */
+.trend-up {
+  color: #10b981 !important;
+}
+.trend-down {
+  color: #f43f5e !important;
+}
+
+/* Tooltip tweaks */
+.MuiTooltip-tooltip {
+  font-size: 0.85rem;
+  background: #1e293b;
+  color: #fff;
+  border-radius: 6px;
+}
