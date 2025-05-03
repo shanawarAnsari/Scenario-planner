@@ -58,8 +58,13 @@ const formatDeltaValue = (value: number, showPercentage = false) => {
     ? `${value > 0 ? "+" : ""}${value.toFixed(2)}%`
     : `${value > 0 ? "+" : ""}${value.toFixed(2)}`;
 
-  const textColor = value > 0 ? "#2ecc71" : value < 0 ? "#ff6b35" : "inherit";
   const arrowClass = value > 0 ? "trend-up" : value < 0 ? "trend-down" : "";
+  const textClass =
+    value > 0
+      ? "delta-text-positive"
+      : value < 0
+      ? "delta-text-negative"
+      : "delta-text-neutral";
 
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -68,7 +73,7 @@ const formatDeltaValue = (value: number, showPercentage = false) => {
       ) : value < 0 ? (
         <ArrowDownward fontSize="small" className={arrowClass} sx={{ mr: 0.5 }} />
       ) : null}
-      <span style={{ color: textColor }}>{formattedValue}</span>
+      <span className={textClass}>{formattedValue}</span>
     </Box>
   );
 };

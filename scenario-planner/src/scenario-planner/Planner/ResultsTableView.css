@@ -1,117 +1,155 @@
-/* ResultsTableView.css */
+/* ResultsTableView.css - "Wow" Dark Theme */
 
 .table-container {
-  background: #ffffff;
+  background: linear-gradient(145deg, #1a1c23 0%, #101218 100%);
   border-radius: 18px;
-  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 24px 0 0 0;
 }
 
 .scenario-table {
   border-radius: 16px;
   overflow: hidden;
-  background: #ffffff;
-  color: #1f2937;
-  font-family: "Inter", "Segoe UI", "Roboto", sans-serif;
-  font-size: 0.98rem;
+  background: rgba(20, 22, 28, 0.85);
+  color: #e0e0e0;
+  font-family: "Orbitron", "Segoe UI", "Roboto", sans-serif; /* Futuristic font */
+  font-size: 0.95rem;
 }
 
 .MuiTableCell-root {
-  border-bottom: 1px solid #f1f5f9 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 14px 18px;
+  color: #c5c8d3;
 }
 
 .MuiTableHead-root .MuiTableCell-root {
-  background: #f9fafb;
-  color: #475569;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 191, 255, 0.15) 0%,
+    rgba(0, 191, 255, 0.05) 100%
+  );
+  color: #00d4ff;
   font-weight: 600;
-  font-size: 0.95rem;
-  border-bottom: 2px solid #e2e8f0 !important;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(0, 191, 255, 0.3) !important;
 }
 
 .MuiTableRow-root.group-row {
-  background: #f8fafc;
+  background: rgba(30, 33, 42, 0.8);
   font-weight: 500;
-  color: #334155;
+  color: #d1d5db;
 }
 
 .MuiTableRow-root.group-row .MuiTableCell-root {
   font-size: 0.95rem;
-  border-bottom: 1px solid #e2e8f0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
 }
 
 .MuiTableRow-root.data-row {
-  background: #ffffff;
-  transition: background 0.15s ease;
+  background: transparent;
+  transition: background 0.2s ease;
 }
 
 .MuiTableRow-root.data-row:hover {
-  background: #f1f5f9;
+  background: rgba(0, 191, 255, 0.08);
 }
 
 .MuiTableRow-root.total-row {
-  background: #f1f5f9;
-  font-weight: 600;
-  color: #334155;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 191, 255, 0.2) 0%,
+    rgba(0, 191, 255, 0.08) 100%
+  );
+  font-weight: 700;
+  color: #e0e0e0;
 }
 
-/* Indentation for group and data rows */
+.MuiTableRow-root.total-row .MuiTableCell-root {
+  color: #ffffff;
+}
+
+/* Indentation */
 .group-indent-0 {
-  padding-left: 12px !important;
+  padding-left: 18px !important;
 }
 .group-indent-1 {
-  padding-left: 36px !important;
+  padding-left: 42px !important;
 }
 .group-indent-2 {
-  padding-left: 60px !important;
+  padding-left: 66px !important;
 }
 .group-indent-3 {
-  padding-left: 84px !important;
+  padding-left: 90px !important;
 }
 .group-indent-4 {
-  padding-left: 108px !important;
+  padding-left: 114px !important;
 }
 .data-indent-1 {
-  padding-left: 60px !important;
+  padding-left: 66px !important;
 }
 .data-indent-2 {
-  padding-left: 84px !important;
+  padding-left: 90px !important;
 }
 .data-indent-3 {
-  padding-left: 108px !important;
+  padding-left: 114px !important;
 }
 .data-indent-4 {
-  padding-left: 132px !important;
+  padding-left: 138px !important;
 }
 
-/* Icon button tweaks */
+/* Icon button */
 .MuiIconButton-root {
-  color: #64748b;
-  background: transparent;
+  color: #00bfff;
+  background: rgba(0, 191, 255, 0.1);
   border-radius: 8px;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
+  padding: 6px;
 }
 .MuiIconButton-root:hover {
-  background: #e2e8f0;
-  color: #334155;
+  background: rgba(0, 191, 255, 0.25);
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
 }
 
-/* Typography tweaks */
+/* Typography */
 .scenario-table .MuiTypography-root {
   font-size: 0.95rem;
+  font-weight: 500;
 }
 
-/* Arrow icons */
+/* Arrow icons & Delta Text Colors */
 .trend-up {
-  color: #10b981 !important;
+  color: #00ffaa !important; /* Vibrant Green/Aqua */
 }
 .trend-down {
-  color: #f43f5e !important;
+  color: #ff4d80 !important; /* Vibrant Pink/Red */
+}
+.delta-text-positive {
+  color: #00ffaa;
+  text-shadow: 0 0 5px rgba(0, 255, 170, 0.5);
+}
+.delta-text-negative {
+  color: #ff4d80;
+  text-shadow: 0 0 5px rgba(255, 77, 128, 0.5);
+}
+.delta-text-neutral {
+  color: #c5c8d3;
 }
 
-/* Tooltip tweaks */
+/* Tooltip */
 .MuiTooltip-tooltip {
   font-size: 0.85rem;
-  background: #1e293b;
-  color: #fff;
+  background: rgba(0, 191, 255, 0.9);
+  color: #0a0a0a;
   border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3);
+  font-family: "Segoe UI", "Roboto", sans-serif;
 }
+
+/* Add Google Font for Orbitron if not already included */
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap");
