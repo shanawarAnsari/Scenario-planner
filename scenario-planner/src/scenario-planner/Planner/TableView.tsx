@@ -159,7 +159,7 @@ const TableHeader: React.FC<{
               {allExpanded ? <UnfoldLess /> : <UnfoldMore />}
             </IconButton>
           </Tooltip>
-          <span>Product</span>
+          <span style={{ marginLeft: "12px" }}>Product</span>
         </Box>
       </TableCell>
       <TableCell colSpan={3}>Price (£)</TableCell>
