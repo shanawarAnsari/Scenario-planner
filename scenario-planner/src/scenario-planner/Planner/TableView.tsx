@@ -67,6 +67,22 @@ const PromoTypeChip: React.FC<{ promoType: string }> = ({ promoType }) => {
   );
 };
 
+// Helper function to sort items by promo type
+const sortByPromoType = (items: MockDataItem[]): MockDataItem[] => {
+  const promoOrder: Record<string, number> = {
+    "No Promo": 1,
+    Display: 2,
+    Feature: 3,
+    Discount: 4,
+  };
+
+  return [...items].sort((a, b) => {
+    const orderA = promoOrder[a.promoType] || 999;
+    const orderB = promoOrder[b.promoType] || 999;
+    return orderA - orderB;
+  });
+};
+
 // Extracted row component for better readability
 const DataRow: React.FC<{
   item: MockDataItem;
@@ -273,7 +289,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                             className="osku-row"
                           />
                           {expandedOSKUs[osku] &&
-                            items.map((item) => (
+                            sortByPromoType(items).map((item) => (
                               <DataRow key={item.pid} item={item} indentLevel={4} />
                             ))}
                         </React.Fragment>
@@ -319,7 +335,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                       className="osku-row"
                     />
                     {expandedOSKUs[osku] &&
-                      items.map((item) => (
+                      sortByPromoType(items).map((item) => (
                         <DataRow key={item.pid} item={item} indentLevel={3} />
                       ))}
                   </React.Fragment>
@@ -354,7 +370,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                 className="osku-row"
               />
               {expandedOSKUs[osku] &&
-                items.map((item) => (
+                sortByPromoType(items).map((item) => (
                   <DataRow key={item.pid} item={item} indentLevel={2} />
                 ))}
             </React.Fragment>
@@ -376,7 +392,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
           className="osku-row"
         />
         {expandedOSKUs[osku] &&
-          items.map((item) => (
+          sortByPromoType(items).map((item) => (
             <DataRow key={item.pid} item={item} indentLevel={1} />
           ))}
       </React.Fragment>
