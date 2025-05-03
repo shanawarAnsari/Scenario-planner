@@ -1,79 +1,72 @@
-/* ResultsTableView.css - "Wow" Dark Theme */
+/* ResultsTableView.css - Light Theme with Gray Header */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 .table-container {
-  background: linear-gradient(145deg, #1a1c23 0%, #101218 100%);
-  border-radius: 18px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(149, 157, 165, 0.08); /* Lighter shadow */
   padding: 24px 0 0 0;
+  border: 1px solid #e9ecef; /* Light border */
 }
 
 .scenario-table {
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
-  background: rgba(20, 22, 28, 0.85);
-  color: #e0e0e0;
-  font-family: "Orbitron", "Segoe UI", "Roboto", sans-serif; /* Futuristic font */
-  font-size: 0.95rem;
+  background: #ffffff;
+  color: #212529; /* Dark text */
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
 }
 
 .MuiTableCell-root {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: 1px solid #f1f3f5 !important; /* Lighter cell border */
   padding: 14px 18px;
-  color: #c5c8d3;
+  color: #495057; /* Standard text color */
 }
 
 .MuiTableHead-root .MuiTableCell-root {
-  background: linear-gradient(
-    90deg,
-    rgba(0, 191, 255, 0.15) 0%,
-    rgba(0, 191, 255, 0.05) 100%
-  );
-  color: #00d4ff;
+  background: #f8f9fa; /* Light Gray Header */
+  color: #6c757d; /* Gray text for header */
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(0, 191, 255, 0.3) !important;
+  border-bottom: 2px solid #dee2e6 !important; /* Slightly darker gray border */
 }
 
 .MuiTableRow-root.group-row {
-  background: rgba(30, 33, 42, 0.8);
+  background: #f8f9fa; /* Light gray for group rows */
   font-weight: 500;
-  color: #d1d5db;
+  color: #343a40;
 }
 
 .MuiTableRow-root.group-row .MuiTableCell-root {
-  font-size: 0.95rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+  font-size: 0.88rem;
+  border-bottom: 1px solid #e9ecef !important;
 }
 
 .MuiTableRow-root.data-row {
-  background: transparent;
-  transition: background 0.2s ease;
+  background: #ffffff;
+  transition: background 0.15s ease;
 }
 
 .MuiTableRow-root.data-row:hover {
-  background: rgba(0, 191, 255, 0.08);
+  background: #f8f9fa; /* Light gray hover */
 }
 
 .MuiTableRow-root.total-row {
-  background: linear-gradient(
-    90deg,
-    rgba(0, 191, 255, 0.2) 0%,
-    rgba(0, 191, 255, 0.08) 100%
-  );
-  font-weight: 700;
-  color: #e0e0e0;
+  background: #e9ecef; /* Slightly darker gray for total row */
+  font-weight: 600;
+  color: #212529; /* Dark text for total row */
 }
 
 .MuiTableRow-root.total-row .MuiTableCell-root {
-  color: #ffffff;
+  color: #212529;
+  border-bottom: none !important;
 }
 
-/* Indentation */
+/* Indentation (remains the same) */
 .group-indent-0 {
   padding-left: 18px !important;
 }
@@ -104,52 +97,47 @@
 
 /* Icon button */
 .MuiIconButton-root {
-  color: #00bfff;
-  background: rgba(0, 191, 255, 0.1);
+  color: #6c757d; /* Gray icon */
+  background: #f1f3f5; /* Light gray background */
   border-radius: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   padding: 6px;
 }
 .MuiIconButton-root:hover {
-  background: rgba(0, 191, 255, 0.25);
-  color: #ffffff;
-  box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+  background: #e9ecef;
+  color: #495057;
 }
 
-/* Typography */
+/* Typography (remains the same) */
 .scenario-table .MuiTypography-root {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 500;
 }
 
-/* Arrow icons & Delta Text Colors */
+/* Arrow icons & Delta Text Colors (using standard green/red) */
 .trend-up {
-  color: #00ffaa !important; /* Vibrant Green/Aqua */
+  color: #10b981 !important;
 }
 .trend-down {
-  color: #ff4d80 !important; /* Vibrant Pink/Red */
+  color: #f43f5e !important;
 }
 .delta-text-positive {
-  color: #00ffaa;
-  text-shadow: 0 0 5px rgba(0, 255, 170, 0.5);
+  color: #047857;
 }
 .delta-text-negative {
-  color: #ff4d80;
-  text-shadow: 0 0 5px rgba(255, 77, 128, 0.5);
+  color: #be123c;
 }
 .delta-text-neutral {
-  color: #c5c8d3;
+  color: #495057;
 }
 
 /* Tooltip */
 .MuiTooltip-tooltip {
-  font-size: 0.85rem;
-  background: rgba(0, 191, 255, 0.9);
-  color: #0a0a0a;
+  font-size: 0.8rem;
+  background: #343a40; /* Dark gray tooltip */
+  color: #ffffff;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 191, 255, 0.3);
-  font-family: "Segoe UI", "Roboto", sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  font-family: "Inter", sans-serif;
+  padding: 5px 9px;
 }
-
-/* Add Google Font for Orbitron if not already included */
-@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap");
