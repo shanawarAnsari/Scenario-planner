@@ -77,7 +77,7 @@ const DataRow: React.FC<{
   showPromoType?: boolean;
 }> = ({ item, indentLevel, showPromoType = true }) => {
   const rowClass = `item-row item-row-indent-${indentLevel}`;
-  const paddingLeft = `${indentLevel * 24}px`;
+  const paddingLeft = `${indentLevel * 24 + 28}px`;
 
   return (
     <TableRow key={item.pid} className={rowClass}>
