@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { mockData as resultsData } from "../../mockData";
 
 // Define types in a separate section for better readability
-export interface MockDataItem {
+export interface ResultsDataItem {
   osku: string;
   brd: string;
   subBrd: string;
@@ -18,12 +18,15 @@ export interface MockDataItem {
   ra: number;
   deltaRev: number;
   promoType: string;
+  pa: number; // Profit After
+  pb: number; // Profit Before
+  pd: number; // Profit Delta
 }
 
 export type GroupLevel = "Brand" | "SubBrand" | "PPG" | "OSKU";
 
 // Type definitions for grouped data structures
-export type GroupedByOSKU = Record<string, MockDataItem[]>;
+export type GroupedByOSKU = Record<string, ResultsDataItem[]>;
 export type GroupedByPPG = Record<string, GroupedByOSKU>;
 export type GroupedBySubBrand = Record<string, GroupedByPPG>;
 export type GroupedByBrand = Record<string, GroupedBySubBrand>;
@@ -34,7 +37,7 @@ export type GroupedData =
   | GroupedBySubBrand
   | GroupedByPPG
   | GroupedByOSKU
-  | MockDataItem[];
+  | ResultsDataItem[];
 
 // Create utility function outside of hooks to avoid react-hooks/rules-of-hooks error
 const createStateObject = (initialState: Record<string, boolean> = {}) => {

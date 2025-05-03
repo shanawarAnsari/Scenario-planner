@@ -11,64 +11,32 @@ import {
   Box,
   IconButton,
   Tooltip,
-  Chip,
 } from "@mui/material";
-import { ExpandMore, ExpandLess, UnfoldMore, UnfoldLess } from "@mui/icons-material";
+import {
+  ExpandMore,
+  ExpandLess,
+  UnfoldMore,
+  UnfoldLess,
+  ArrowUpward,
+  ArrowDownward,
+} from "@mui/icons-material";
 import {
   useTableData,
-  MockDataItem,
+  ResultsDataItem,
   GroupLevel,
   GroupedByBrand,
   GroupedBySubBrand,
   GroupedByPPG,
   GroupedByOSKU,
 } from "./hooks/useTableData";
-import "./TableView.css";
 
 // Props interface
 interface TableViewProps {
   level: GroupLevel;
 }
 
-// PromoType component to display promo type with appropriate styling
-const PromoTypeChip: React.FC<{ promoType: string }> = ({ promoType }) => {
-  let color:
-    | "default"
-    | "primary"
-    | "secondary"
-    | "error"
-    | "info"
-    | "success"
-    | "warning" = "default";
-
-  switch (promoType) {
-    case "Display":
-      color = "primary";
-      break;
-    case "Feature":
-      color = "secondary";
-      break;
-    case "Discount":
-      color = "error";
-      break;
-    case "No Promo":
-    default:
-      color = "default";
-  }
-
-  return (
-    <Chip
-      sx={{ borderRadius: "4px" }}
-      label={promoType}
-      color={color}
-      size="small"
-      className="promo-chip"
-    />
-  );
-};
-
 // Helper function to sort items by promo type
-const sortByPromoType = (items: MockDataItem[]): MockDataItem[] => {
+const sortByPromoType = (items: ResultsDataItem[]): ResultsDataItem[] => {
   const promoOrder: Record<string, number> = {
     "No Promo": 1,
     Display: 2,
@@ -83,34 +51,64 @@ const sortByPromoType = (items: MockDataItem[]): MockDataItem[] => {
   });
 };
 
-// Extracted row component for better readability
+// Format delta values to show + sign for positive values and include colored trend arrows
+const formatDeltaValue = (value: number, showPercentage = false) => {
+  const formattedValue = showPercentage
+    ? `${value > 0 ? "+" : ""}${value.toFixed(2)}%`
+    : `${value > 0 ? "+" : ""}${value.toFixed(2)}`;
+
+  const textColor = value > 0 ? "green" : value < 0 ? "#ff6b35" : "inherit";
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center" }}>
+      {value > 0 ? (
+        <ArrowUpward fontSize="small" sx={{ color: "green", mr: 0.5 }} />
+      ) : value < 0 ? (
+        <ArrowDownward fontSize="small" sx={{ color: "#ff6b35", mr: 0.5 }} />
+      ) : null}
+      <span style={{ color: textColor }}>{formattedValue}</span>
+    </Box>
+  );
+};
+
 const DataRow: React.FC<{
-  item: MockDataItem;
+  item: ResultsDataItem;
   indentLevel: number;
   showPromoType?: boolean;
 }> = ({ item, indentLevel, showPromoType = true }) => {
+  const rowClass = `item-row item-row-indent-${indentLevel}`;
+  const paddingLeft = `${indentLevel * 24}px`;
+
   return (
-    <TableRow key={item.pid} className="table-row">
-      <TableCell
-        className={`body-cell`}
-        sx={{ paddingLeft: `${indentLevel * 23}px` }}
-      >
-        {showPromoType && <PromoTypeChip promoType={item.promoType} />}
+    <TableRow key={item.pid} className={rowClass}>
+      <TableCell sx={{ paddingLeft }}>
+        {showPromoType && <span>{item.promoType}</span>}
         {!showPromoType && item.osku}
       </TableCell>
-      <TableCell className="body-cell text-right">{item.ppk.toFixed(2)}</TableCell>
-      <TableCell className="body-cell text-right">{item.ppka.toFixed(2)}</TableCell>
-      <TableCell className="body-cell text-right">
-        {item.deltaPpk.toFixed(2)}
+      <TableCell>{item.ppk.toFixed(2)}</TableCell>
+      <TableCell>{item.ppka.toFixed(2)}</TableCell>
+      <TableCell className="delta-cell">{formatDeltaValue(item.deltaPpk)}</TableCell>
+      <TableCell>{item.vpk.toLocaleString()}</TableCell>
+      <TableCell>{item.vpka.toLocaleString()}</TableCell>
+      <TableCell className="delta-cell">
+        {formatDeltaValue(item.deltaVpk, true)}
       </TableCell>
-      <TableCell className="body-cell text-right">{item.vpk}</TableCell>
-      <TableCell className="body-cell text-right">{item.vpka}</TableCell>
-      <TableCell className="body-cell text-right">{item.deltaVpk}</TableCell>
-      <TableCell className="body-cell text-right">{item.r.toFixed(2)}</TableCell>
-      <TableCell className="body-cell text-right">{item.ra.toFixed(2)}</TableCell>
-      <TableCell className="body-cell text-right">
-        {item.deltaRev.toFixed(2)}
+      <TableCell>
+        {item.r.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </TableCell>
+      <TableCell>
+        {item.ra.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+      </TableCell>
+      <TableCell className="delta-cell">
+        {formatDeltaValue(item.deltaRev, true)}
+      </TableCell>
+      <TableCell>
+        {item.pb.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+      </TableCell>
+      <TableCell>
+        {item.pa.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+      </TableCell>
+      <TableCell className="delta-cell">{formatDeltaValue(item.pd, true)}</TableCell>
     </TableRow>
   );
 };
@@ -120,32 +118,29 @@ const GroupRow: React.FC<{
   id: string;
   isExpanded: boolean;
   onToggle: (id: string) => void;
-  paddingLeft?: number;
-  itemCount?: number;
-  className?: string;
-}> = ({ id, isExpanded, onToggle, paddingLeft = 16, itemCount, className }) => (
-  <TableRow className={`group-row ${className || ""}`}>
-    <TableCell
-      colSpan={10}
-      className="group-header"
-      style={{ paddingLeft: `${paddingLeft}px` }}
-    >
-      <IconButton size="small" onClick={() => onToggle(id)}>
-        {isExpanded ? (
-          <ExpandLess fontSize="small" />
-        ) : (
-          <ExpandMore fontSize="small" />
-        )}
-      </IconButton>
-      {id}
-      {itemCount !== undefined && (
-        <Typography variant="caption" component="span" className="group-count">
-          ({itemCount})
-        </Typography>
-      )}
-    </TableCell>
-  </TableRow>
-);
+  indentLevel: number;
+}> = ({ id, isExpanded, onToggle, indentLevel }) => {
+  const paddingLeft = `${indentLevel * 24}px`;
+
+  return (
+    <TableRow className="group-row">
+      <TableCell colSpan={13} sx={{ paddingLeft }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <IconButton size="small" onClick={() => onToggle(id)}>
+            {isExpanded ? (
+              <ExpandLess fontSize="small" />
+            ) : (
+              <ExpandMore fontSize="small" />
+            )}
+          </IconButton>
+          <Typography variant="body2" component="span" sx={{ ml: 1 }}>
+            {id}
+          </Typography>
+        </Box>
+      </TableCell>
+    </TableRow>
+  );
+};
 
 // Table header component
 const TableHeader: React.FC<{
@@ -154,11 +149,8 @@ const TableHeader: React.FC<{
 }> = ({ allExpanded, toggleAllGroups }) => (
   <TableHead>
     <TableRow>
-      <TableCell
-        className="header-cell-base header-cell product-header-cell"
-        rowSpan={3}
-      >
-        <Box className="product-header-content">
+      <TableCell rowSpan={3}>
+        <Box>
           <Tooltip title={allExpanded ? "Collapse All" : "Expand All"}>
             <IconButton size="small" onClick={toggleAllGroups}>
               {allExpanded ? <UnfoldLess /> : <UnfoldMore />}
@@ -167,53 +159,24 @@ const TableHeader: React.FC<{
           <span>Product</span>
         </Box>
       </TableCell>
-      <TableCell
-        className="header-cell-base group-header-cell no-bottom-border"
-        colSpan={3}
-      >
-        Price (£)
-      </TableCell>
-      <TableCell
-        className="header-cell-base group-header-cell no-bottom-border"
-        colSpan={3}
-      >
-        Volume
-      </TableCell>
-      <TableCell
-        className="header-cell-base group-header-cell no-bottom-border"
-        colSpan={3}
-      >
-        Revenue (£)
-      </TableCell>
+      <TableCell colSpan={3}>Price (£)</TableCell>
+      <TableCell colSpan={3}>Volume</TableCell>
+      <TableCell colSpan={3}>Revenue (£)</TableCell>
+      <TableCell colSpan={3}>Profits (£)</TableCell>
     </TableRow>
     <TableRow>
-      <TableCell className="header-cell-base header-cell text-right">
-        Price Per Pack
-      </TableCell>
-      <TableCell className="header-cell-base header-cell text-right">
-        Price Per Pack After
-      </TableCell>
-      <TableCell className="header-cell-base header-cell text-right">
-        Delta PPK
-      </TableCell>
-      <TableCell className="header-cell-base header-cell text-right">
-        Volume Per Pack
-      </TableCell>
-      <TableCell className="header-cell-base header-cell text-right">
-        Volume Per Pack After
-      </TableCell>
-      <TableCell className="header-cell-base header-cell text-right">
-        Delta VPK
-      </TableCell>
-      <TableCell className="header-cell-base header-cell text-right">
-        Revenue
-      </TableCell>
-      <TableCell className="header-cell-base header-cell text-right">
-        Revenue After
-      </TableCell>
-      <TableCell className="header-cell-base header-cell text-right">
-        Delta Rev
-      </TableCell>
+      <TableCell>Price</TableCell>
+      <TableCell>New Price</TableCell>
+      <TableCell>△</TableCell>
+      <TableCell>Volume</TableCell>
+      <TableCell>New Volume</TableCell>
+      <TableCell>△ %</TableCell>
+      <TableCell>Revenue</TableCell>
+      <TableCell>New Revenue</TableCell>
+      <TableCell>△ %</TableCell>
+      <TableCell>Profit</TableCell>
+      <TableCell>New Profit</TableCell>
+      <TableCell>△ %</TableCell>
     </TableRow>
   </TableHead>
 );
@@ -235,6 +198,20 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
   } = useTableData(level);
 
   const [allExpanded, setAllExpanded] = useState(false);
+  const totals = {
+    avgPpk: 10.5,
+    avgPpka: 11.0,
+    deltaPpk: 4.76, // Calculated as ((11.00 - 10.50) / 10.50) * 100
+    totalVpk: 150000,
+    totalVpka: 155000,
+    deltaVpk: 3.33, // Calculated as ((155000 - 150000) / 150000) * 100
+    totalRev: 1575000,
+    totalRevA: 1705000,
+    deltaRev: 8.25, // Calculated as ((1705000 - 1575000) / 1575000) * 100
+    totalProfit: 300000,
+    totalProfitA: 315000,
+    deltaProfit: 5.0, // Calculated as ((315000 - 300000) / 300000) * 100
+  };
 
   // Toggle all groups function
   const toggleAllGroups = () => {
@@ -256,6 +233,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
           id={brand}
           isExpanded={expandedGroups[brand]}
           onToggle={toggleGroup}
+          indentLevel={0}
         />
         {expandedGroups[brand] &&
           Object.entries(subGroups).map(([subBrand, ppgGroups]) => (
@@ -264,7 +242,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                 id={subBrand}
                 isExpanded={expandedSubGroups[subBrand]}
                 onToggle={toggleSubGroup}
-                paddingLeft={32}
+                indentLevel={1}
               />
               {expandedSubGroups[subBrand] &&
                 Object.entries(ppgGroups).map(([ppg, oskuGroups]) => (
@@ -273,7 +251,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                       id={ppg}
                       isExpanded={expandedPPGs[ppg]}
                       onToggle={togglePPG}
-                      paddingLeft={48}
+                      indentLevel={2}
                     />
                     {expandedPPGs[ppg] &&
                       typeof oskuGroups === "object" &&
@@ -284,9 +262,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                             id={osku}
                             isExpanded={expandedOSKUs[osku]}
                             onToggle={toggleOSKU}
-                            paddingLeft={64}
-                            itemCount={items.length}
-                            className="osku-row"
+                            indentLevel={3}
                           />
                           {expandedOSKUs[osku] &&
                             sortByPromoType(items).map((item) => (
@@ -310,7 +286,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
           id={subBrand}
           isExpanded={expandedGroups[subBrand]}
           onToggle={toggleGroup}
-          paddingLeft={16}
+          indentLevel={0}
         />
         {expandedGroups[subBrand] &&
           Object.entries(ppgGroups).map(([ppg, oskuGroups]) => (
@@ -319,7 +295,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                 id={ppg}
                 isExpanded={expandedPPGs[ppg]}
                 onToggle={togglePPG}
-                paddingLeft={32}
+                indentLevel={1}
               />
               {expandedPPGs[ppg] &&
                 typeof oskuGroups === "object" &&
@@ -330,9 +306,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                       id={osku}
                       isExpanded={expandedOSKUs[osku]}
                       onToggle={toggleOSKU}
-                      paddingLeft={48}
-                      itemCount={items.length}
-                      className="osku-row"
+                      indentLevel={2}
                     />
                     {expandedOSKUs[osku] &&
                       sortByPromoType(items).map((item) => (
@@ -354,7 +328,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
           id={ppg}
           isExpanded={expandedPPGs[ppg]}
           onToggle={togglePPG}
-          paddingLeft={16}
+          indentLevel={0}
         />
         {expandedPPGs[ppg] &&
           typeof oskuGroups === "object" &&
@@ -365,9 +339,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
                 id={osku}
                 isExpanded={expandedOSKUs[osku]}
                 onToggle={toggleOSKU}
-                paddingLeft={32}
-                itemCount={items.length}
-                className="osku-row"
+                indentLevel={1}
               />
               {expandedOSKUs[osku] &&
                 sortByPromoType(items).map((item) => (
@@ -387,9 +359,7 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
           id={osku}
           isExpanded={expandedOSKUs[osku]}
           onToggle={toggleOSKU}
-          paddingLeft={16}
-          itemCount={items.length}
-          className="osku-row"
+          indentLevel={0}
         />
         {expandedOSKUs[osku] &&
           sortByPromoType(items).map((item) => (
@@ -416,14 +386,84 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
   };
 
   return (
-    <Box className="table-view-container">
-      <Typography variant="h5" className="table-title">
-        Scenario Planner Table
-      </Typography>
-      <TableContainer component={Paper} className="table-container">
-        <Table stickyHeader size="small">
+    <Box>
+      <Typography variant="h5">Scenario Planner Table</Typography>
+      <TableContainer component={Paper}>
+        <Table stickyHeader size="small" sx={{ color: "#333333" }}>
           <TableHeader allExpanded={allExpanded} toggleAllGroups={toggleAllGroups} />
-          <TableBody>{renderGroupedData()}</TableBody>
+          <TableBody>
+            {/* Total row at the top of the table - Using hardcoded values */}
+            <TableRow className="total-row">
+              <TableCell align={"right"} colSpan={1}>
+                <Typography variant="subtitle1" sx={{ fontSize: "0.9rem" }}>
+                  Total
+                </Typography>
+              </TableCell>
+              <TableCell>
+                <span className="total-value">{totals.avgPpk.toFixed(2)}</span>
+              </TableCell>
+              <TableCell>
+                <span className="total-value">{totals.avgPpka.toFixed(2)}</span>
+              </TableCell>
+              <TableCell className="delta-cell">
+                {formatDeltaValue(totals.deltaPpk)}{" "}
+                {/* Delta calculation is now hardcoded */}
+              </TableCell>
+              <TableCell>
+                <span className="total-value">
+                  {totals.totalVpk.toLocaleString()}
+                </span>
+              </TableCell>
+              <TableCell>
+                <span className="total-value">
+                  {totals.totalVpka.toLocaleString()}
+                </span>
+              </TableCell>
+              <TableCell className="delta-cell">
+                {formatDeltaValue(totals.deltaVpk, true)}{" "}
+                {/* Delta calculation is now hardcoded */}
+              </TableCell>
+              <TableCell>
+                <span className="total-value">
+                  {totals.totalRev.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </TableCell>
+              <TableCell>
+                <span className="total-value">
+                  {totals.totalRevA.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </TableCell>
+              <TableCell className="delta-cell">
+                {formatDeltaValue(totals.deltaRev, true)}{" "}
+                {/* Delta calculation is now hardcoded */}
+              </TableCell>
+              <TableCell>
+                <span className="total-value">
+                  {totals.totalProfit.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </TableCell>
+              <TableCell>
+                <span className="total-value">
+                  {totals.totalProfitA.toLocaleString(undefined, {
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </TableCell>
+              <TableCell className="delta-cell">
+                {formatDeltaValue(totals.deltaProfit, true)}{" "}
+                {/* Delta calculation is now hardcoded */}
+              </TableCell>
+            </TableRow>
+
+            {/* Grouped data rows */}
+            {renderGroupedData()}
+          </TableBody>
         </Table>
       </TableContainer>
     </Box>
