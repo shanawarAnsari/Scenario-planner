@@ -2,40 +2,197 @@
 .table {
   width: 100%;
   border-collapse: collapse;
+  border: 1px solid #e0e0e0; /* Lighter border */
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Modern font stack */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+  border-radius: 8px; /* Rounded corners for the container */
+  overflow: hidden; /* Ensure border-radius clips content */
 }
 
 .table th,
 .table td {
-  padding: 8px;
+  padding: 12px 6px; /* Increased padding */
   text-align: left;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e0e0e0; /* Lighter border */
+  transition: background-color 0.2s ease; /* Smoother transition */
+}
+
+/* Remove bottom border from the last row in the body */
+.table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .table th {
-  background-color: #f4f4f4;
-  font-weight: bold;
+  background-color: #f8f9fa; /* Very light grey header */
+  color: #495057; /* Dark grey text */
+  font-weight: 600; /* Slightly bolder */
+  font-size: 0.85rem; /* Slightly smaller header text */
+  text-transform: uppercase; /* Uppercase headers */
+  letter-spacing: 0.5px; /* Spacing for uppercase */
+  white-space: nowrap;
+  border-bottom: 2px solid #dee2e6; /* Slightly stronger header bottom border */
+}
+
+/* Remove zebra striping */
+.table tbody tr:nth-of-type(even):not(.group-row) {
+  background-color: #ffffff;
+}
+
+/* Hover effect for data rows */
+.table tbody tr.data-row:hover {
+  /* Target data rows specifically */
+  background-color: #f1f3f5; /* Slightly darker hover */
 }
 
 /* Delta value styles */
+.delta-value-box {
+  display: flex;
+  align-items: center;
+}
+
+.delta-arrow-icon {
+  margin-right: 4px; /* Equivalent to sx={{ mr: 0.5 }} */
+}
+
 .delta-text-positive {
-  color: #388e3c;
+  color: #28a745; /* Brighter green */
   font-weight: 500;
 }
 .delta-text-negative {
-  color: #ff3e3e;
+  color: #dc3545; /* Brighter red */
   font-weight: 500;
 }
 .delta-text-neutral {
-  color: #444;
+  color: #6c757d; /* Grey for neutral */
+}
+
+/* Group Row Styles */
+.group-row td {
+  background-color: #f1f3f5; /* Light grey group row */
+  font-weight: 600; /* Bolder group titles */
+  color: #343a40; /* Darker text */
+  border-top: 1px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 0.9rem; /* Slightly larger group text */
+}
+
+.group-row-content {
+  display: flex;
+  align-items: center;
+}
+
+.group-row-text {
+  margin-left: 8px; /* Equivalent to sx={{ ml: 1 }} */
+}
+
+/* Table Header Styles */
+.table-header-product-cell {
+  display: flex;
+  align-items: center;
+  min-width: 250px;
+}
+
+.table-header-product-text {
+  margin-left: 12px;
 }
 
 /* Total row styles */
 .total-row {
-  background-color: #fbfbfb;
-  font-weight: bold;
+  background-color: #e9ecef; /* Slightly darker total row */
+  font-weight: 700; /* Bold total */
+  border-top: 2px solid #adb5bd;
+  border-bottom: none;
+}
+
+.total-row td {
+  color: #212529; /* Dark text for total */
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+
+.total-row-label {
+  font-size: 0.9rem !important; /* Override default variant styles if needed */
 }
 
 /* No-wrap class */
 .no-wrap {
   white-space: nowrap;
+}
+
+/* Style adjustments for icons */
+.MuiIconButton-root {
+  color: #6c757d; /* Grey icon color */
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Specific styles for expand/collapse buttons */
+.expand-collapse-button,
+.expand-collapse-all-button {
+  padding: 4px;
+  border-radius: 50%; /* Circular buttons */
+  background-color: transparent;
+}
+
+.expand-collapse-button:hover,
+.expand-collapse-all-button:hover {
+  background-color: rgba(0, 86, 179, 0.1); /* Light blue background on hover */
+  color: #0056b3; /* Standard link blue on hover */
+}
+
+.expand-collapse-all-button {
+  margin-right: 8px;
+}
+
+.expand-collapse-button .MuiSvgIcon-root,
+.expand-collapse-all-button .MuiSvgIcon-root {
+  font-size: 1.25rem; /* Slightly larger icons */
+}
+
+/* Promo Chip Styles */
+.promo-chip {
+  padding: 2px 8px !important; /* Adjust padding */
+  height: 24px !important; /* Consistent height */
+  border-radius: 12px !important; /* Pill shape */
+  font-size: 0.75rem !important; /* Smaller font */
+  font-weight: 500 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  line-height: 1 !important; /* Ensure text is centered vertically */
+  border: none !important; /* Remove default border if any */
+}
+
+.promo-chip .MuiChip-icon {
+  margin-left: 4px !important; /* Space before icon */
+  margin-right: -4px !important; /* Adjust spacing if icon is present */
+  font-size: 1rem !important; /* Icon size */
+}
+
+/* Add back specific chip styles */
+.promo-chip-none {
+  background-color: #e9ecef !important; /* Light grey */
+  color: #495057 !important; /* Dark grey text */
+}
+
+.promo-chip-display {
+  background-color: #d1e7fd !important; /* Light blue */
+  color: #0a58ca !important; /* Darker blue text */
+}
+.promo-chip-display .MuiChip-icon {
+  color: #0a58ca !important; /* Icon color matches text */
+}
+
+.promo-chip-feature {
+  background-color: #d1fadf !important; /* Light green */
+  color: #146c43 !important; /* Darker green text */
+}
+.promo-chip-feature .MuiChip-icon {
+  color: #146c43 !important; /* Icon color matches text */
+}
+
+.promo-chip-discount {
+  background-color: #fff3cd !important; /* Light yellow */
+  color: #856404 !important; /* Darker yellow/brown text */
+}
+.promo-chip-discount .MuiChip-icon {
+  color: #856404 !important; /* Icon color matches text */
 }

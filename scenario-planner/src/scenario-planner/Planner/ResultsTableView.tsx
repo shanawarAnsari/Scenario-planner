@@ -11,6 +11,7 @@ import {
   Box,
   IconButton,
   Tooltip,
+  Chip,
 } from "@mui/material";
 import {
   ExpandMore,
@@ -19,6 +20,9 @@ import {
   UnfoldLess,
   ArrowUpward,
   ArrowDownward,
+  StorefrontOutlined,
+  LocalOfferOutlined,
+  ExtensionOutlined,
 } from "@mui/icons-material";
 import {
   useResultsTableData,
@@ -52,6 +56,32 @@ const sortByPromoType = (items: ResultsDataItem[]): ResultsDataItem[] => {
   });
 };
 
+// Helper function to get promo chip details (returns class names)
+const getPromoChipDetails = (
+  promoType: string
+): { icon: any; className: string } => {
+  switch (promoType) {
+    case "Display":
+      return {
+        icon: <StorefrontOutlined fontSize="small" />,
+        className: "promo-chip-display",
+      };
+    case "Feature":
+      return {
+        icon: <ExtensionOutlined fontSize="small" />,
+        className: "promo-chip-feature",
+      };
+    case "Discount":
+      return {
+        icon: <LocalOfferOutlined fontSize="small" />,
+        className: "promo-chip-discount",
+      };
+    case "No Promo":
+    default:
+      return { icon: undefined, className: "promo-chip-none" };
+  }
+};
+
 // Format delta values to show + sign for positive values and include colored trend arrows
 const formatDeltaValue = (value: number, showPercentage = false) => {
   const formattedValue = showPercentage
@@ -63,11 +93,14 @@ const formatDeltaValue = (value: number, showPercentage = false) => {
   else if (value < 0) colorClass = "delta-text-negative";
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center" }}>
+    <Box className="delta-value-box">
       {value > 0 ? (
-        <ArrowUpward fontSize="small" sx={{ mr: 0.5 }} className={colorClass} />
+        <ArrowUpward fontSize="small" className={`delta-arrow-icon ${colorClass}`} />
       ) : value < 0 ? (
-        <ArrowDownward fontSize="small" sx={{ mr: 0.5 }} className={colorClass} />
+        <ArrowDownward
+          fontSize="small"
+          className={`delta-arrow-icon ${colorClass}`}
+        />
       ) : null}
       <span className={colorClass}>{formattedValue}</span>
     </Box>
@@ -79,14 +112,22 @@ const DataRow: React.FC<{
   indentLevel: number;
   showPromoType?: boolean;
 }> = ({ item, indentLevel, showPromoType = true }) => {
-  // For DataRow, always indent one level more than the grouping row
-  const paddingLeft = 32 + indentLevel * 24;
+  const paddingLeft = 50 + indentLevel * 24;
+  const { icon, className: chipClassName } = getPromoChipDetails(item.promoType);
 
   return (
-    <TableRow key={item.pid}>
-      <TableCell className="no-wrap" style={{ paddingLeft, minWidth: 150 }}>
-        {showPromoType && <span>{item.promoType}</span>}
-        {!showPromoType && item.osku}
+    <TableRow key={item.pid} className="data-row">
+      <TableCell className="no-wrap" style={{ paddingLeft }}>
+        {showPromoType ? (
+          <Chip
+            icon={icon}
+            label={item.promoType}
+            size="small"
+            className={`promo-chip ${chipClassName}`}
+          />
+        ) : (
+          item.osku
+        )}
       </TableCell>
       <TableCell className="no-wrap">{item.ppk.toFixed(2)}</TableCell>
       <TableCell className="no-wrap">{item.ppka.toFixed(2)}</TableCell>
@@ -126,13 +167,13 @@ const GroupRow: React.FC<{
   const paddingLeft = 16 + indentLevel * 24;
 
   return (
-    <TableRow>
-      <TableCell colSpan={13} style={{ paddingLeft, minWidth: 250 }}>
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+    <TableRow className="group-row">
+      <TableCell colSpan={13} style={{ paddingLeft }}>
+        <Box className="group-row-content">
           <IconButton
             size="small"
             onClick={() => onToggle(id)}
-            sx={{ color: "#1976d2" }}
+            className="expand-collapse-button"
           >
             {isExpanded ? (
               <ExpandLess fontSize="small" />
@@ -140,7 +181,7 @@ const GroupRow: React.FC<{
               <ExpandMore fontSize="small" />
             )}
           </IconButton>
-          <Typography variant="body2" component="span" sx={{ ml: 1 }}>
+          <Typography variant="body2" component="span" className="group-row-text">
             {id}
           </Typography>
         </Box>
@@ -156,18 +197,18 @@ const TableHeader: React.FC<{
 }> = ({ allExpanded, toggleAllGroups }) => (
   <TableHead>
     <TableRow>
-      <TableCell className="no-wrap" style={{ minWidth: 250 }} rowSpan={3}>
-        <Box>
+      <TableCell className="no-wrap" rowSpan={3}>
+        <Box className="table-header-product-cell">
           <Tooltip title={allExpanded ? "Collapse All" : "Expand All"}>
             <IconButton
               size="small"
               onClick={toggleAllGroups}
-              sx={{ color: "#1976d2" }}
+              className="expand-collapse-all-button"
             >
               {allExpanded ? <UnfoldLess /> : <UnfoldMore />}
             </IconButton>
           </Tooltip>
-          <span style={{ marginLeft: "12px" }}>Product</span>
+          <span className="table-header-product-text">Product</span>
         </Box>
       </TableCell>
       <TableCell className="no-wrap" colSpan={3}>
@@ -209,19 +250,18 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
   const totals = {
     avgPpk: 10.5,
     avgPpka: 11.0,
-    deltaPpk: 4.76, // Calculated as ((11.00 - 10.50) / 10.50) * 100
+    deltaPpk: 4.76,
     totalVpk: 150000,
     totalVpka: 155000,
-    deltaVpk: 3.33, // Calculated as ((155000 - 150000) / 150000) * 100
+    deltaVpk: 3.33,
     totalRev: 1575000,
     totalRevA: 1705000,
-    deltaRev: 8.25, // Calculated as ((1705000 - 1575000) / 1575000) * 100
+    deltaRev: 8.25,
     totalProfit: 300000,
     totalProfitA: 315000,
-    deltaProfit: 5.0, // Calculated as ((315000 - 300000) / 300000) * 100
+    deltaProfit: 5.0,
   };
 
-  // Toggle all groups function
   const toggleAllGroups = () => {
     setAllExpanded(!allExpanded);
 
@@ -232,7 +272,6 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
     }
   };
 
-  // Render functions for each level
   const renderBrandLevel = () => {
     const data = groupedData as GroupedByBrand;
     return Object.entries(data).map(([brand, subGroups]) => (
@@ -377,7 +416,6 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
     ));
   };
 
-  // Main render function
   const renderGroupedData = () => {
     switch (level) {
       case "Brand":
@@ -395,14 +433,13 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
 
   return (
     <Box>
-      <TableContainer component={Paper}>
+      <TableContainer component={Paper} className="table">
         <Table stickyHeader size="small">
           <TableHeader allExpanded={allExpanded} toggleAllGroups={toggleAllGroups} />
           <TableBody>
-            {/* Total row at the top of the table - Using hardcoded values */}
             <TableRow className="total-row">
               <TableCell className="no-wrap" align={"right"} colSpan={1}>
-                <Typography variant="subtitle1" sx={{ fontSize: "0.9rem" }}>
+                <Typography variant="subtitle1" className="total-row-label">
                   Total:
                 </Typography>
               </TableCell>
@@ -459,8 +496,6 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
                 {formatDeltaValue(totals.deltaProfit, true)}
               </TableCell>
             </TableRow>
-
-            {/* Grouped data rows */}
             {renderGroupedData()}
           </TableBody>
         </Table>
