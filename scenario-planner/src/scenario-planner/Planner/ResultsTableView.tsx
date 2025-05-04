@@ -80,34 +80,38 @@ const DataRow: React.FC<{
   showPromoType?: boolean;
 }> = ({ item, indentLevel, showPromoType = true }) => {
   // For DataRow, always indent one level more than the grouping row
-  const paddingLeft = 16 + indentLevel * 24;
+  const paddingLeft = 32 + indentLevel * 24;
 
   return (
     <TableRow key={item.pid}>
-      <TableCell style={{ paddingLeft, minWidth: 250 }}>
+      <TableCell className="no-wrap" style={{ paddingLeft, minWidth: 150 }}>
         {showPromoType && <span>{item.promoType}</span>}
         {!showPromoType && item.osku}
       </TableCell>
-      <TableCell>{item.ppk.toFixed(2)}</TableCell>
-      <TableCell>{item.ppka.toFixed(2)}</TableCell>
-      <TableCell>{formatDeltaValue(item.deltaPpk)}</TableCell>
-      <TableCell>{item.vpk.toLocaleString()}</TableCell>
-      <TableCell>{item.vpka.toLocaleString()}</TableCell>
-      <TableCell>{formatDeltaValue(item.deltaVpk, true)}</TableCell>
-      <TableCell>
+      <TableCell className="no-wrap">{item.ppk.toFixed(2)}</TableCell>
+      <TableCell className="no-wrap">{item.ppka.toFixed(2)}</TableCell>
+      <TableCell className="no-wrap">{formatDeltaValue(item.deltaPpk)}</TableCell>
+      <TableCell className="no-wrap">{item.vpk.toLocaleString()}</TableCell>
+      <TableCell className="no-wrap">{item.vpka.toLocaleString()}</TableCell>
+      <TableCell className="no-wrap">
+        {formatDeltaValue(item.deltaVpk, true)}
+      </TableCell>
+      <TableCell className="no-wrap">
         {item.r.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </TableCell>
-      <TableCell>
+      <TableCell className="no-wrap">
         {item.ra.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </TableCell>
-      <TableCell>{formatDeltaValue(item.deltaRev, true)}</TableCell>
-      <TableCell>
+      <TableCell className="no-wrap">
+        {formatDeltaValue(item.deltaRev, true)}
+      </TableCell>
+      <TableCell className="no-wrap">
         {item.pb.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </TableCell>
-      <TableCell>
+      <TableCell className="no-wrap">
         {item.pa.toLocaleString(undefined, { maximumFractionDigits: 2 })}
       </TableCell>
-      <TableCell>{formatDeltaValue(item.pd, true)}</TableCell>
+      <TableCell className="no-wrap">{formatDeltaValue(item.pd, true)}</TableCell>
     </TableRow>
   );
 };
@@ -152,7 +156,7 @@ const TableHeader: React.FC<{
 }> = ({ allExpanded, toggleAllGroups }) => (
   <TableHead>
     <TableRow>
-      <TableCell rowSpan={3} style={{ minWidth: 250 }}>
+      <TableCell className="no-wrap" style={{ minWidth: 250 }} rowSpan={3}>
         <Box>
           <Tooltip title={allExpanded ? "Collapse All" : "Expand All"}>
             <IconButton
@@ -166,24 +170,32 @@ const TableHeader: React.FC<{
           <span style={{ marginLeft: "12px" }}>Product</span>
         </Box>
       </TableCell>
-      <TableCell colSpan={3}>Price (£)</TableCell>
-      <TableCell colSpan={3}>Volume</TableCell>
-      <TableCell colSpan={3}>Revenue (£)</TableCell>
-      <TableCell colSpan={3}>Profits (£)</TableCell>
+      <TableCell className="no-wrap" colSpan={3}>
+        Price (£)
+      </TableCell>
+      <TableCell className="no-wrap" colSpan={3}>
+        Volume
+      </TableCell>
+      <TableCell className="no-wrap" colSpan={3}>
+        Revenue (£)
+      </TableCell>
+      <TableCell className="no-wrap" colSpan={3}>
+        Profits (£)
+      </TableCell>
     </TableRow>
     <TableRow>
-      <TableCell>Price</TableCell>
-      <TableCell>New Price</TableCell>
-      <TableCell>△</TableCell>
-      <TableCell>Volume</TableCell>
-      <TableCell>New Volume</TableCell>
-      <TableCell>△ %</TableCell>
-      <TableCell>Revenue</TableCell>
-      <TableCell>New Revenue</TableCell>
-      <TableCell>△ %</TableCell>
-      <TableCell>Profit</TableCell>
-      <TableCell>New Profit</TableCell>
-      <TableCell>△ %</TableCell>
+      <TableCell className="no-wrap">Price</TableCell>
+      <TableCell className="no-wrap">New Price</TableCell>
+      <TableCell className="no-wrap">△</TableCell>
+      <TableCell className="no-wrap">Volume</TableCell>
+      <TableCell className="no-wrap">New Volume</TableCell>
+      <TableCell className="no-wrap">△ %</TableCell>
+      <TableCell className="no-wrap">Revenue</TableCell>
+      <TableCell className="no-wrap">New Revenue</TableCell>
+      <TableCell className="no-wrap">△ %</TableCell>
+      <TableCell className="no-wrap">Profit</TableCell>
+      <TableCell className="no-wrap">New Profit</TableCell>
+      <TableCell className="no-wrap">△ %</TableCell>
     </TableRow>
   </TableHead>
 );
@@ -389,55 +401,63 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
           <TableBody>
             {/* Total row at the top of the table - Using hardcoded values */}
             <TableRow className="total-row">
-              <TableCell align={"right"} colSpan={1}>
+              <TableCell className="no-wrap" align={"right"} colSpan={1}>
                 <Typography variant="subtitle1" sx={{ fontSize: "0.9rem" }}>
                   Total:
                 </Typography>
               </TableCell>
-              <TableCell>
+              <TableCell className="no-wrap">
                 <span>{totals.avgPpk.toFixed(2)}</span>
               </TableCell>
-              <TableCell>
+              <TableCell className="no-wrap">
                 <span>{totals.avgPpka.toFixed(2)}</span>
               </TableCell>
-              <TableCell>{formatDeltaValue(totals.deltaPpk)}</TableCell>
-              <TableCell>
+              <TableCell className="no-wrap">
+                {formatDeltaValue(totals.deltaPpk)}
+              </TableCell>
+              <TableCell className="no-wrap">
                 <span>{totals.totalVpk.toLocaleString()}</span>
               </TableCell>
-              <TableCell>
+              <TableCell className="no-wrap">
                 <span>{totals.totalVpka.toLocaleString()}</span>
               </TableCell>
-              <TableCell>{formatDeltaValue(totals.deltaVpk, true)}</TableCell>
-              <TableCell>
+              <TableCell className="no-wrap">
+                {formatDeltaValue(totals.deltaVpk, true)}
+              </TableCell>
+              <TableCell className="no-wrap">
                 <span>
                   {totals.totalRev.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="no-wrap">
                 <span>
                   {totals.totalRevA.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
-              <TableCell>{formatDeltaValue(totals.deltaRev, true)}</TableCell>
-              <TableCell>
+              <TableCell className="no-wrap">
+                {formatDeltaValue(totals.deltaRev, true)}
+              </TableCell>
+              <TableCell className="no-wrap">
                 <span>
                   {totals.totalProfit.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="no-wrap">
                 <span>
                   {totals.totalProfitA.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
-              <TableCell>{formatDeltaValue(totals.deltaProfit, true)}</TableCell>
+              <TableCell className="no-wrap">
+                {formatDeltaValue(totals.deltaProfit, true)}
+              </TableCell>
             </TableRow>
 
             {/* Grouped data rows */}

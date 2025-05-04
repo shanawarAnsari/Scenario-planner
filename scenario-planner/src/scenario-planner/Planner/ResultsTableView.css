@@ -34,3 +34,8 @@
   background-color: #fbfbfb;
   font-weight: bold;
 }
+
+/* No-wrap class */
+.no-wrap {
+  white-space: nowrap;
+}
