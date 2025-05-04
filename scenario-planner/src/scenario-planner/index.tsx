@@ -7,7 +7,7 @@ import {
   InputLabel,
 } from "@mui/material";
 import React from "react";
-import TableView from "./Planner/TableView";
+import ResultsTableView from "./Planner/ResultsTableView";
 
 const ScenarioPlanner: React.FC = () => {
   const theme = useTheme();
@@ -32,7 +32,7 @@ const ScenarioPlanner: React.FC = () => {
             <MenuItem value="OSKU">OSKU</MenuItem>
           </Select>
         </FormControl>
-        <TableView level={level} />
+        <ResultsTableView level={level} />
       </Box>
     </>
   );

@@ -21,18 +21,18 @@ import {
   ArrowDownward,
 } from "@mui/icons-material";
 import {
-  useTableData,
+  useResultsTableData,
   ResultsDataItem,
   GroupLevel,
   GroupedByBrand,
   GroupedBySubBrand,
   GroupedByPPG,
   GroupedByOSKU,
-} from "./hooks/useTableData";
+} from "./hooks/useResultsTableData";
 import "./ResultsTableView.css";
 
 // Props interface
-interface TableViewProps {
+interface ResultsTableViewProps {
   level: GroupLevel;
 }
 
@@ -58,22 +58,18 @@ const formatDeltaValue = (value: number, showPercentage = false) => {
     ? `${value > 0 ? "+" : ""}${value.toFixed(2)}%`
     : `${value > 0 ? "+" : ""}${value.toFixed(2)}`;
 
-  const arrowClass = value > 0 ? "trend-up" : value < 0 ? "trend-down" : "";
-  const textClass =
-    value > 0
-      ? "delta-text-positive"
-      : value < 0
-      ? "delta-text-negative"
-      : "delta-text-neutral";
+  let colorClass = "delta-text-neutral";
+  if (value > 0) colorClass = "delta-text-positive";
+  else if (value < 0) colorClass = "delta-text-negative";
 
   return (
     <Box sx={{ display: "flex", alignItems: "center" }}>
       {value > 0 ? (
-        <ArrowUpward fontSize="small" className={arrowClass} sx={{ mr: 0.5 }} />
+        <ArrowUpward fontSize="small" sx={{ mr: 0.5 }} className={colorClass} />
       ) : value < 0 ? (
-        <ArrowDownward fontSize="small" className={arrowClass} sx={{ mr: 0.5 }} />
+        <ArrowDownward fontSize="small" sx={{ mr: 0.5 }} className={colorClass} />
       ) : null}
-      <span className={textClass}>{formattedValue}</span>
+      <span className={colorClass}>{formattedValue}</span>
     </Box>
   );
 };
@@ -84,11 +80,11 @@ const DataRow: React.FC<{
   showPromoType?: boolean;
 }> = ({ item, indentLevel, showPromoType = true }) => {
   // For DataRow, always indent one level more than the grouping row
-  const dataIndentClass = `data-indent-${indentLevel}`;
+  const paddingLeft = 16 + indentLevel * 24;
 
   return (
-    <TableRow key={item.pid} className="data-row">
-      <TableCell className={dataIndentClass}>
+    <TableRow key={item.pid}>
+      <TableCell style={{ paddingLeft, minWidth: 250 }}>
         {showPromoType && <span>{item.promoType}</span>}
         {!showPromoType && item.osku}
       </TableCell>
@@ -123,13 +119,17 @@ const GroupRow: React.FC<{
   onToggle: (id: string) => void;
   indentLevel: number;
 }> = ({ id, isExpanded, onToggle, indentLevel }) => {
-  const groupIndentClass = `group-indent-${indentLevel}`;
+  const paddingLeft = 16 + indentLevel * 24;
 
   return (
-    <TableRow className="group-row">
-      <TableCell colSpan={13} className={groupIndentClass}>
+    <TableRow>
+      <TableCell colSpan={13} style={{ paddingLeft, minWidth: 250 }}>
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <IconButton size="small" onClick={() => onToggle(id)}>
+          <IconButton
+            size="small"
+            onClick={() => onToggle(id)}
+            sx={{ color: "#1976d2" }}
+          >
             {isExpanded ? (
               <ExpandLess fontSize="small" />
             ) : (
@@ -152,10 +152,14 @@ const TableHeader: React.FC<{
 }> = ({ allExpanded, toggleAllGroups }) => (
   <TableHead>
     <TableRow>
-      <TableCell rowSpan={3}>
+      <TableCell rowSpan={3} style={{ minWidth: 250 }}>
         <Box>
           <Tooltip title={allExpanded ? "Collapse All" : "Expand All"}>
-            <IconButton size="small" onClick={toggleAllGroups}>
+            <IconButton
+              size="small"
+              onClick={toggleAllGroups}
+              sx={{ color: "#1976d2" }}
+            >
               {allExpanded ? <UnfoldLess /> : <UnfoldMore />}
             </IconButton>
           </Tooltip>
@@ -184,10 +188,10 @@ const TableHeader: React.FC<{
   </TableHead>
 );
 
-// Main TableView component
-const TableView: React.FC<TableViewProps> = ({ level }) => {
+// Main ResultsTableView component
+const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
   const { groupedData, expansionState, toggleExpansion, expandAll, collapseAll } =
-    useTableData(level);
+    useResultsTableData(level);
 
   const [allExpanded, setAllExpanded] = useState(false);
   const totals = {
@@ -379,18 +383,15 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
 
   return (
     <Box>
-      <Typography variant="h5" sx={{ mb: 2, color: "#2a3142", fontWeight: 700 }}>
-        Scenario Planner Table
-      </Typography>
-      <TableContainer component={Paper} className="table-container">
-        <Table stickyHeader size="small" className="scenario-table">
+      <TableContainer component={Paper}>
+        <Table stickyHeader size="small">
           <TableHeader allExpanded={allExpanded} toggleAllGroups={toggleAllGroups} />
           <TableBody>
             {/* Total row at the top of the table - Using hardcoded values */}
             <TableRow className="total-row">
               <TableCell align={"right"} colSpan={1}>
                 <Typography variant="subtitle1" sx={{ fontSize: "0.9rem" }}>
-                  Total
+                  Total:
                 </Typography>
               </TableCell>
               <TableCell>
@@ -448,4 +449,4 @@ const TableView: React.FC<TableViewProps> = ({ level }) => {
   );
 };
 
-export default TableView;
+export default ResultsTableView;

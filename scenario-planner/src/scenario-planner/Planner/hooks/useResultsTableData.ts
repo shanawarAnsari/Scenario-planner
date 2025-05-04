@@ -44,7 +44,7 @@ const createStateObject = (initialState: Record<string, boolean> = {}) => {
   return initialState;
 };
 
-export const useTableData = (level: GroupLevel) => {
+export const useResultsTableData = (level: GroupLevel) => {
   // Single state object for managing expansion of all levels
   const [expansionState, setExpansionState] = useState<Record<string, boolean>>({});
 
