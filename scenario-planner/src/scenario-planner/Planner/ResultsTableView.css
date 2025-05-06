@@ -69,8 +69,8 @@
 /* Group Row Styles */
 .group-row td {
   background-color: #f1f3f5; /* Light grey group row */
-  font-weight: 600; /* Bolder group titles */
-  color: #343a40; /* Darker text */
+  font-weight: 500; /* Bolder group titles */
+  color: #000; /* Darker text */
   border-top: 1px solid #dee2e6;
   border-bottom: 1px solid #dee2e6;
   font-size: 0.9rem; /* Slightly larger group text */

@@ -56,6 +56,76 @@ const sortByPromoType = (items: ResultsDataItem[]): ResultsDataItem[] => {
   });
 };
 
+// Helper function to calculate aggregated metrics for an OSKU
+const calculateOskuAggregates = (items: ResultsDataItem[]) => {
+  if (!items || items.length === 0) return null;
+
+  // Calculate aggregated values
+  const aggregates = items.reduce(
+    (acc, item) => {
+      // Sum up values
+      acc.totalVpk += item.vpk;
+      acc.totalVpka += item.vpka;
+      acc.totalR += item.r;
+      acc.totalRa += item.ra;
+      acc.totalPb += item.pb;
+      acc.totalPa += item.pa;
+
+      return acc;
+    },
+    {
+      totalVpk: 0,
+      totalVpka: 0,
+      totalR: 0,
+      totalRa: 0,
+      totalPb: 0,
+      totalPa: 0,
+    }
+  );
+
+  // Calculate deltas
+  const deltaVpkPercent =
+    aggregates.totalVpk !== 0
+      ? ((aggregates.totalVpka - aggregates.totalVpk) / aggregates.totalVpk) * 100
+      : 0;
+
+  const deltaRevPercent =
+    aggregates.totalR !== 0
+      ? ((aggregates.totalRa - aggregates.totalR) / aggregates.totalR) * 100
+      : 0;
+
+  const deltaProfitPercent =
+    aggregates.totalPb !== 0
+      ? ((aggregates.totalPa - aggregates.totalPb) / aggregates.totalPb) * 100
+      : 0;
+
+  // Calculate average price (weighted by volume)
+  const totalVolume = items.reduce((acc, item) => acc + item.vpk, 0);
+  const avgPrice =
+    totalVolume !== 0
+      ? items.reduce((acc, item) => acc + item.ppk * item.vpk, 0) / totalVolume
+      : 0;
+
+  const totalVolumeAfter = items.reduce((acc, item) => acc + item.vpka, 0);
+  const avgPriceAfter =
+    totalVolumeAfter !== 0
+      ? items.reduce((acc, item) => acc + item.ppka * item.vpka, 0) /
+        totalVolumeAfter
+      : 0;
+
+  const deltaPpk = avgPriceAfter - avgPrice;
+
+  return {
+    avgPrice,
+    avgPriceAfter,
+    deltaPpk,
+    ...aggregates,
+    deltaVpkPercent,
+    deltaRevPercent,
+    deltaProfitPercent,
+  };
+};
+
 // Helper function to get promo chip details (returns class names)
 const getPromoChipDetails = (
   promoType: string
@@ -163,9 +233,82 @@ const GroupRow: React.FC<{
   isExpanded: boolean;
   onToggle: (id: string) => void;
   indentLevel: number;
-}> = ({ id, isExpanded, onToggle, indentLevel }) => {
+  items?: ResultsDataItem[]; // Add optional items parameter for OSKU rows
+  isOskuLevel?: boolean; // Flag to identify OSKU level rows
+}> = ({ id, isExpanded, onToggle, indentLevel, items, isOskuLevel = false }) => {
   const paddingLeft = 16 + indentLevel * 24;
 
+  // Calculate aggregated metrics for OSKU level rows
+  const aggregates = isOskuLevel && items ? calculateOskuAggregates(items) : null;
+
+  // If this is an OSKU row and we have aggregated data, render with metrics
+  if (isOskuLevel && aggregates) {
+    return (
+      <TableRow className="group-row">
+        <TableCell style={{ paddingLeft }}>
+          <Box className="group-row-content">
+            <IconButton
+              size="small"
+              onClick={() => onToggle(id)}
+              className="expand-collapse-button"
+            >
+              {isExpanded ? (
+                <ExpandLess fontSize="small" />
+              ) : (
+                <ExpandMore fontSize="small" />
+              )}
+            </IconButton>
+            <Typography variant="body2" component="span" className="group-row-text">
+              {id}
+            </Typography>
+          </Box>
+        </TableCell>
+        {/* Display aggregated metrics for OSKU row */}
+        <TableCell className="no-wrap">{aggregates.avgPrice.toFixed(2)}</TableCell>
+        <TableCell className="no-wrap">
+          {aggregates.avgPriceAfter.toFixed(2)}
+        </TableCell>
+        <TableCell className="no-wrap">
+          {formatDeltaValue(aggregates.deltaPpk)}
+        </TableCell>
+        <TableCell className="no-wrap">
+          {aggregates.totalVpk.toLocaleString()}
+        </TableCell>
+        <TableCell className="no-wrap">
+          {aggregates.totalVpka.toLocaleString()}
+        </TableCell>
+        <TableCell className="no-wrap">
+          {formatDeltaValue(aggregates.deltaVpkPercent, true)}
+        </TableCell>
+        <TableCell className="no-wrap">
+          {aggregates.totalR.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+        </TableCell>
+        <TableCell className="no-wrap">
+          {aggregates.totalRa.toLocaleString(undefined, {
+            maximumFractionDigits: 2,
+          })}
+        </TableCell>
+        <TableCell className="no-wrap">
+          {formatDeltaValue(aggregates.deltaRevPercent, true)}
+        </TableCell>
+        <TableCell className="no-wrap">
+          {aggregates.totalPb.toLocaleString(undefined, {
+            maximumFractionDigits: 2,
+          })}
+        </TableCell>
+        <TableCell className="no-wrap">
+          {aggregates.totalPa.toLocaleString(undefined, {
+            maximumFractionDigits: 2,
+          })}
+        </TableCell>
+        <TableCell className="no-wrap">
+          {formatDeltaValue(aggregates.deltaProfitPercent, true)}
+        </TableCell>
+      </TableRow>
+    );
+  }
+
+  // Default rendering for non-OSKU rows or when aggregates are not available
   return (
     <TableRow className="group-row">
       <TableCell colSpan={13} style={{ paddingLeft }}>
@@ -310,6 +453,8 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
                             isExpanded={!!expansionState[osku]}
                             onToggle={toggleExpansion}
                             indentLevel={3}
+                            items={items}
+                            isOskuLevel={true}
                           />
                           {expansionState[osku] &&
                             sortByPromoType(items).map((item) => (
@@ -354,6 +499,8 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
                       isExpanded={!!expansionState[osku]}
                       onToggle={toggleExpansion}
                       indentLevel={2}
+                      items={items}
+                      isOskuLevel={true}
                     />
                     {expansionState[osku] &&
                       sortByPromoType(items).map((item) => (
@@ -387,6 +534,8 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
                 isExpanded={!!expansionState[osku]}
                 onToggle={toggleExpansion}
                 indentLevel={1}
+                items={items}
+                isOskuLevel={true}
               />
               {expansionState[osku] &&
                 sortByPromoType(items).map((item) => (
@@ -407,6 +556,8 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
           isExpanded={!!expansionState[osku]}
           onToggle={toggleExpansion}
           indentLevel={0}
+          items={items}
+          isOskuLevel={true}
         />
         {expansionState[osku] &&
           sortByPromoType(items).map((item) => (
