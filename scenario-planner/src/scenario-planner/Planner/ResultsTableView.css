@@ -88,12 +88,32 @@
 /* Table Header Styles */
 .table-header-product-cell {
   display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+  min-width: 180px;
+}
+
+.table-header-icons {
+  display: flex;
+  gap: 8px;
+  justify-content: start;
+}
+
+.table-header-bottom-row {
+  display: flex;
   align-items: center;
-  min-width: 250px;
+  margin-top: 18px;
 }
 
 .table-header-product-text {
-  margin-left: 12px;
+  font-weight: 600;
+}
+
+.settings-button,
+.download-button,
+.save-button {
+  padding: 2px;
 }
 
 /* Total row styles */

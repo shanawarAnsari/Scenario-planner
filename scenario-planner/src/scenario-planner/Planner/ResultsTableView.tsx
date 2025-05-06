@@ -23,6 +23,9 @@ import {
   StorefrontOutlined,
   LocalOfferOutlined,
   ExtensionOutlined,
+  Settings,
+  GetApp,
+  Save,
 } from "@mui/icons-material";
 import {
   useResultsTableData,
@@ -164,6 +167,9 @@ const formatDeltaValue = (value: number, showPercentage = false) => {
 
   return (
     <Box className="delta-value-box">
+      <span className={colorClass}>
+        {parseFloat(formattedValue) == 0 ? "⠀" + formattedValue : formattedValue}
+      </span>
       {value > 0 ? (
         <ArrowUpward fontSize="small" className={`delta-arrow-icon ${colorClass}`} />
       ) : value < 0 ? (
@@ -172,7 +178,6 @@ const formatDeltaValue = (value: number, showPercentage = false) => {
           className={`delta-arrow-icon ${colorClass}`}
         />
       ) : null}
-      <span className={colorClass}>{formattedValue}</span>
     </Box>
   );
 };
@@ -342,16 +347,47 @@ const TableHeader: React.FC<{
     <TableRow>
       <TableCell className="no-wrap" rowSpan={3}>
         <Box className="table-header-product-cell">
-          <Tooltip title={allExpanded ? "Collapse All" : "Expand All"}>
-            <IconButton
-              size="small"
-              onClick={toggleAllGroups}
-              className="expand-collapse-all-button"
-            >
-              {allExpanded ? <UnfoldLess /> : <UnfoldMore />}
-            </IconButton>
-          </Tooltip>
-          <span className="table-header-product-text">Product</span>
+          <Box className="table-header-icons">
+            <Tooltip title="Settings">
+              <IconButton
+                size="small"
+                sx={{ border: "1px solid gray" }}
+                className="settings-button"
+              >
+                <Settings fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Download Excel">
+              <IconButton
+                size="small"
+                sx={{ border: "1px solid gray" }}
+                className="download-button"
+              >
+                <GetApp fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Save">
+              <IconButton
+                sx={{ border: "1px solid gray" }}
+                size="small"
+                className="save-button"
+              >
+                <Save fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Box className="table-header-bottom-row">
+            <Tooltip title={allExpanded ? "Collapse All" : "Expand All"}>
+              <IconButton
+                size="small"
+                onClick={toggleAllGroups}
+                className="expand-collapse-all-button"
+              >
+                {allExpanded ? <UnfoldLess /> : <UnfoldMore />}
+              </IconButton>
+            </Tooltip>
+            <span className="table-header-product-text">Product</span>
+          </Box>
         </Box>
       </TableCell>
       <TableCell className="no-wrap" colSpan={3}>
