@@ -37,6 +37,7 @@ import {
   GroupedByOSKU,
 } from "./hooks/useResultsTableData";
 import "./ResultsTableView.css";
+import { mockData } from "../mockData_2";
 
 // Props interface
 interface ResultsTableViewProps {
@@ -50,6 +51,7 @@ const sortByPromoType = (items: ResultsDataItem[]): ResultsDataItem[] => {
     Display: 2,
     Feature: 3,
     Discount: 4,
+    "Cross Impact": 5, // Added for new data structure
   };
 
   return [...items].sort((a, b) => {
@@ -89,30 +91,35 @@ const calculateOskuAggregates = (items: ResultsDataItem[]) => {
   // Calculate deltas
   const deltaVpkPercent =
     aggregates.totalVpk !== 0
-      ? ((aggregates.totalVpka - aggregates.totalVpk) / aggregates.totalVpk) * 100
+      ? ((aggregates.totalVpka - aggregates.totalVpk) /
+          Math.abs(aggregates.totalVpk)) *
+        100
       : 0;
 
   const deltaRevPercent =
     aggregates.totalR !== 0
-      ? ((aggregates.totalRa - aggregates.totalR) / aggregates.totalR) * 100
+      ? ((aggregates.totalRa - aggregates.totalR) / Math.abs(aggregates.totalR)) *
+        100
       : 0;
 
   const deltaProfitPercent =
     aggregates.totalPb !== 0
-      ? ((aggregates.totalPa - aggregates.totalPb) / aggregates.totalPb) * 100
+      ? ((aggregates.totalPa - aggregates.totalPb) / Math.abs(aggregates.totalPb)) *
+        100
       : 0;
 
   // Calculate average price (weighted by volume)
-  const totalVolume = items.reduce((acc, item) => acc + item.vpk, 0);
+  const totalVolume = Math.abs(items.reduce((acc, item) => acc + item.vpk, 0));
   const avgPrice =
     totalVolume !== 0
-      ? items.reduce((acc, item) => acc + item.ppk * item.vpk, 0) / totalVolume
+      ? items.reduce((acc, item) => acc + item.ppk * Math.abs(item.vpk), 0) /
+        totalVolume
       : 0;
 
-  const totalVolumeAfter = items.reduce((acc, item) => acc + item.vpka, 0);
+  const totalVolumeAfter = Math.abs(items.reduce((acc, item) => acc + item.vpka, 0));
   const avgPriceAfter =
     totalVolumeAfter !== 0
-      ? items.reduce((acc, item) => acc + item.ppka * item.vpka, 0) /
+      ? items.reduce((acc, item) => acc + item.ppka * Math.abs(item.vpka), 0) /
         totalVolumeAfter
       : 0;
 
@@ -145,6 +152,11 @@ const getPromoChipDetails = (
         className: "promo-chip-feature",
       };
     case "Discount":
+      return {
+        icon: <LocalOfferOutlined fontSize="small" />,
+        className: "promo-chip-discount",
+      };
+    case "Cross Impact":
       return {
         icon: <LocalOfferOutlined fontSize="small" />,
         className: "promo-chip-discount",
@@ -426,20 +438,19 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
     useResultsTableData(level);
 
   const [allExpanded, setAllExpanded] = useState(false);
-  const totals = {
-    avgPpk: 10.5,
-    avgPpka: 11.0,
-    deltaPpk: 4.76,
-    totalVpk: 150000,
-    totalVpka: 155000,
-    deltaVpk: 3.33,
-    totalRev: 1575000,
-    totalRevA: 1705000,
-    deltaRev: 8.25,
-    totalProfit: 300000,
-    totalProfitA: 315000,
-    deltaProfit: 5.0,
-  };
+
+  // Use totals from mockData_2.js
+  const totals = mockData.totals;
+
+  // Calculate percentage changes for totals
+  const deltaVpkPercent =
+    totals.vpk !== 0 ? (totals.vpkd / Math.abs(totals.vpk)) * 100 : 0;
+
+  const deltaRevPercent =
+    totals.rb !== 0 ? ((totals.ra - totals.rb) / Math.abs(totals.rb)) * 100 : 0;
+
+  const deltaProfitPercent =
+    totals.pb !== 0 ? ((totals.pa - totals.pb) / Math.abs(totals.pb)) * 100 : 0;
 
   const toggleAllGroups = () => {
     setAllExpanded(!allExpanded);
@@ -493,8 +504,12 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
                             isOskuLevel={true}
                           />
                           {expansionState[osku] &&
-                            sortByPromoType(items).map((item) => (
-                              <DataRow key={item.pid} item={item} indentLevel={4} />
+                            sortByPromoType(items).map((item, idx) => (
+                              <DataRow
+                                key={`${item.pid}-${idx}`}
+                                item={item}
+                                indentLevel={4}
+                              />
                             ))}
                         </React.Fragment>
                       ))}
@@ -539,8 +554,12 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
                       isOskuLevel={true}
                     />
                     {expansionState[osku] &&
-                      sortByPromoType(items).map((item) => (
-                        <DataRow key={item.pid} item={item} indentLevel={3} />
+                      sortByPromoType(items).map((item, idx) => (
+                        <DataRow
+                          key={`${item.pid}-${idx}`}
+                          item={item}
+                          indentLevel={3}
+                        />
                       ))}
                   </React.Fragment>
                 ))}
@@ -574,8 +593,8 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
                 isOskuLevel={true}
               />
               {expansionState[osku] &&
-                sortByPromoType(items).map((item) => (
-                  <DataRow key={item.pid} item={item} indentLevel={2} />
+                sortByPromoType(items).map((item, idx) => (
+                  <DataRow key={`${item.pid}-${idx}`} item={item} indentLevel={2} />
                 ))}
             </React.Fragment>
           ))}
@@ -596,8 +615,8 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
           isOskuLevel={true}
         />
         {expansionState[osku] &&
-          sortByPromoType(items).map((item) => (
-            <DataRow key={item.pid} item={item} indentLevel={1} />
+          sortByPromoType(items).map((item, idx) => (
+            <DataRow key={`${item.pid}-${idx}`} item={item} indentLevel={1} />
           ))}
       </React.Fragment>
     ));
@@ -631,56 +650,56 @@ const ResultsTableView: React.FC<ResultsTableViewProps> = ({ level }) => {
                 </Typography>
               </TableCell>
               <TableCell className="no-wrap">
-                <span>{totals.avgPpk.toFixed(2)}</span>
+                <span>{totals.ppk.toFixed(2)}</span>
               </TableCell>
               <TableCell className="no-wrap">
-                <span>{totals.avgPpka.toFixed(2)}</span>
+                <span>{totals.uppk.toFixed(2)}</span>
               </TableCell>
               <TableCell className="no-wrap">
-                {formatDeltaValue(totals.deltaPpk)}
+                {formatDeltaValue(totals.ppkd)}
               </TableCell>
               <TableCell className="no-wrap">
-                <span>{totals.totalVpk.toLocaleString()}</span>
+                <span>{totals.vpk.toLocaleString()}</span>
               </TableCell>
               <TableCell className="no-wrap">
-                <span>{totals.totalVpka.toLocaleString()}</span>
+                <span>{totals.uvpk.toLocaleString()}</span>
               </TableCell>
               <TableCell className="no-wrap">
-                {formatDeltaValue(totals.deltaVpk, true)}
+                {formatDeltaValue(deltaVpkPercent, true)}
               </TableCell>
               <TableCell className="no-wrap">
                 <span>
-                  {totals.totalRev.toLocaleString(undefined, {
+                  {totals.rb.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
               <TableCell className="no-wrap">
                 <span>
-                  {totals.totalRevA.toLocaleString(undefined, {
+                  {totals.ra.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
               <TableCell className="no-wrap">
-                {formatDeltaValue(totals.deltaRev, true)}
+                {formatDeltaValue(deltaRevPercent, true)}
               </TableCell>
               <TableCell className="no-wrap">
                 <span>
-                  {totals.totalProfit.toLocaleString(undefined, {
+                  {totals.pb.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
               <TableCell className="no-wrap">
                 <span>
-                  {totals.totalProfitA.toLocaleString(undefined, {
+                  {totals.pa.toLocaleString(undefined, {
                     maximumFractionDigits: 2,
                   })}
                 </span>
               </TableCell>
               <TableCell className="no-wrap">
-                {formatDeltaValue(totals.deltaProfit, true)}
+                {formatDeltaValue(deltaProfitPercent, true)}
               </TableCell>
             </TableRow>
             {renderGroupedData()}

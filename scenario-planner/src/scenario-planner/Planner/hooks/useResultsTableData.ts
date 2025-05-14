@@ -1,7 +1,36 @@
 import { useState, useMemo } from "react";
-import { mockData as resultsData } from "../../mockData";
+import { mockData } from "../../mockData_2";
 
-// Define types in a separate section for better readability
+// Define types to match the new data structure
+export interface KPI {
+  pt: string; // Promo Type
+  ppk: number; // Price per unit
+  uppk: number; // Updated price per unit
+  ppkd: number; // Price delta
+  vpk: number; // Volume
+  uvpk: number; // Updated volume
+  vpkd: number; // Volume delta
+  rb: number; // Revenue before
+  ra: number; // Revenue after
+  rd: number; // Revenue delta
+  pb: number; // Profit before
+  pa: number; // Profit after
+  pd: number; // Profit delta
+}
+
+export interface Product {
+  pid: string;
+  osku: string;
+  brd: string;
+  subBrd: string;
+  ppg: string;
+  mfr: string;
+  cat: string;
+  cust: string;
+  kpis: KPI[];
+}
+
+// Flattened structure for rendering in table - each KPI becomes an item
 export interface ResultsDataItem {
   osku: string;
   brd: string;
@@ -10,17 +39,17 @@ export interface ResultsDataItem {
   pid: string;
   ppk: number;
   vpk: number;
-  ppka: number;
-  deltaPpk: number;
-  vpka: number;
-  deltaVpk: number;
-  r: number;
+  ppka: number; // using uppk as ppka
+  deltaPpk: number; // using ppkd as deltaPpk
+  vpka: number; // using uvpk as vpka
+  deltaVpk: number; // calculated from vpk and uvpk
+  r: number; // using rb as r
   ra: number;
-  deltaRev: number;
-  promoType: string;
-  pa: number; // Profit After
-  pb: number; // Profit Before
-  pd: number; // Profit Delta
+  deltaRev: number; // calculated from rb and ra
+  promoType: string; // using pt as promoType
+  pa: number;
+  pb: number;
+  pd: number;
 }
 
 export type GroupLevel = "Brand" | "SubBrand" | "PPG" | "OSKU";
@@ -38,6 +67,43 @@ export type GroupedData =
   | GroupedByPPG
   | GroupedByOSKU
   | ResultsDataItem[];
+
+// Function to convert the new data structure to the flat structure needed for rendering
+const transformData = (products: Product[]): ResultsDataItem[] => {
+  const items: ResultsDataItem[] = [];
+
+  products.forEach((product) => {
+    product.kpis.forEach((kpi) => {
+      // Calculate percentage change for volume and revenue
+      const deltaVpkPercent = kpi.vpk !== 0 ? (kpi.vpkd / kpi.vpk) * 100 : 0;
+      const deltaRevPercent =
+        kpi.rb !== 0 ? ((kpi.ra - kpi.rb) / Math.abs(kpi.rb)) * 100 : 0;
+
+      items.push({
+        osku: product.osku,
+        brd: product.brd,
+        subBrd: product.subBrd,
+        ppg: product.ppg,
+        pid: product.pid,
+        ppk: kpi.ppk,
+        vpk: kpi.vpk,
+        ppka: kpi.uppk,
+        deltaPpk: kpi.ppkd,
+        vpka: kpi.uvpk,
+        deltaVpk: deltaVpkPercent,
+        r: kpi.rb,
+        ra: kpi.ra,
+        deltaRev: deltaRevPercent,
+        promoType: kpi.pt,
+        pa: kpi.pa,
+        pb: kpi.pb,
+        pd: kpi.pd,
+      });
+    });
+  });
+
+  return items;
+};
 
 // Create utility function outside of hooks to avoid react-hooks/rules-of-hooks error
 const createStateObject = (initialState: Record<string, boolean> = {}) => {
@@ -60,6 +126,9 @@ export const useResultsTableData = (level: GroupLevel) => {
   const setExpansionStateBatch = (newState: Record<string, boolean>) => {
     setExpansionState((prev) => ({ ...prev, ...newState }));
   };
+
+  // Convert new data structure to flat structure
+  const resultsData = useMemo(() => transformData(mockData.products), []);
 
   // Group data based on the selected level
   const groupedData: GroupedData = useMemo(() => {
@@ -107,7 +176,7 @@ export const useResultsTableData = (level: GroupLevel) => {
       default:
         return {};
     }
-  }, [level]);
+  }, [level, resultsData]);
 
   // Type guard functions to improve type safety
   const isBrandLevel = (data: GroupedData): data is GroupedByBrand => {
