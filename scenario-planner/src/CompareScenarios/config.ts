@@ -9,14 +9,14 @@ export const kpis: KPI[] = [
     trendKey: "vpkd_per",
   },
   {
-    label: "Revenue",
+    label: "Revenue(£)",
     key: "ra",
     unit: "",
     showTrend: true,
     trendKey: "rd_per",
   },
   {
-    label: "Profit",
+    label: "Profit(£)",
     key: "pa",
     unit: "",
     showTrend: true,

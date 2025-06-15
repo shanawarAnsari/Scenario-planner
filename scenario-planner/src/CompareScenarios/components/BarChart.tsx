@@ -28,7 +28,7 @@ const BarChart: React.FC<BarChartProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
-  const maxValue = Math.max(beforeValue, afterValue) * 1.2; // Add 20% buffer for better visibility
+  const maxValue = Math.max(beforeValue, afterValue) * 1.1; // Add 20% buffer for better visibility
   const beforePercentage = (beforeValue / maxValue) * 100;
   const afterPercentage = (afterValue / maxValue) * 100;
 
@@ -41,11 +41,10 @@ const BarChart: React.FC<BarChartProps> = ({
   };
 
   const colors = getColorScheme();
-
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
       {/* Compact Stacked Bar Chart */}
-      <Box sx={{ flex: 1, maxWidth: "70%" }}>
+      <Box sx={{ flex: 1 }}>
         {/* Before Value Bar */}
         <Box
           sx={{
@@ -120,19 +119,20 @@ const BarChart: React.FC<BarChartProps> = ({
             </Typography>
           </Box>
         </Box>
-      </Box>
-
+      </Box>{" "}
       {/* Percentage Change */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          minWidth: "100px", // Double the width from 50px to 100px
+          minWidth: "80px",
           height: "32px",
           borderRadius: 1,
           backgroundColor: isIncrease ? "#f0f9f3" : "#fef2f2",
           border: `1px solid ${isIncrease ? "#d1fae5" : "#fecaca"}`,
+          px: 1, // Reduced horizontal padding
+          ml: "auto", // Right align the chip
         }}
       >
         {" "}

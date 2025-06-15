@@ -8,9 +8,10 @@ interface KPIRowProps {
   kpi: KPI;
   scenarios: Scenario[];
   isLast: boolean;
+  viewMode: "chart" | "data";
 }
 
-const KPIRow: React.FC<KPIRowProps> = ({ kpi, scenarios, isLast }) => {
+const KPIRow: React.FC<KPIRowProps> = ({ kpi, scenarios, isLast, viewMode }) => {
   return (
     <Box
       sx={{
@@ -22,11 +23,16 @@ const KPIRow: React.FC<KPIRowProps> = ({ kpi, scenarios, isLast }) => {
       {" "}
       <Box
         sx={{
-          width: 280,
-          p: 2, // Reduced from 3 to 2
+          width: 180,
+          minWidth: 180,
+          p: 2,
           borderRight: "1px solid #e5e7eb",
           display: "flex",
           alignItems: "center",
+          backgroundColor: "white",
+          position: "sticky",
+          left: 0,
+          zIndex: 5,
         }}
       >
         <Typography variant="body2" fontWeight={700} sx={{ color: "#374151" }}>
@@ -37,10 +43,9 @@ const KPIRow: React.FC<KPIRowProps> = ({ kpi, scenarios, isLast }) => {
         const value = scenario.kcTotals[kpi.key];
         const displayValue = formatValue(value, kpi.unit);
         const trendValue = kpi.trendKey ? scenario.kcTotals[kpi.trendKey] : null;
-
-        // Determine if we should show a bar chart (for volume, revenue, profit)
         const showBarChart =
-          kpi.key === "uvpk" || kpi.key === "ra" || kpi.key === "pa";
+          (kpi.key === "uvpk" || kpi.key === "ra" || kpi.key === "pa") &&
+          viewMode === "chart";
         let beforeValue = 0;
 
         if (showBarChart) {
@@ -53,9 +58,9 @@ const KPIRow: React.FC<KPIRowProps> = ({ kpi, scenarios, isLast }) => {
           <Box
             key={`${scenario.name}-${kpi.key}`}
             sx={{
-              flex: 1,
-              minWidth: 200,
-              p: 2, // Reduced from 3 to 2
+              width: 250, // Fixed width to match header
+              minWidth: 250, // Prevent shrinking
+              p: 2,
               borderRight:
                 index < scenarios.length - 1 ? "1px solid #e5e7eb" : "none",
               display: "flex",
@@ -65,7 +70,6 @@ const KPIRow: React.FC<KPIRowProps> = ({ kpi, scenarios, isLast }) => {
               gap: showBarChart ? 1 : 0,
             }}
           >
-            {" "}
             {showBarChart ? (
               <>
                 <BarChart
@@ -82,14 +86,26 @@ const KPIRow: React.FC<KPIRowProps> = ({ kpi, scenarios, isLast }) => {
                   variant="body1"
                   fontWeight={500}
                   sx={{
-                    color: value < 0 ? "#dc2626" : "#059669",
+                    color:
+                      viewMode === "data"
+                        ? "#374151"
+                        : value < 0
+                        ? "#dc2626"
+                        : "#059669",
                     fontSize: "16px",
                   }}
                 >
                   {displayValue}
                 </Typography>
                 {kpi.showTrend && trendValue !== null && (
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-end",
+                      gap: 2,
+                    }}
+                  >
                     {getTrendIcon(trendValue)}
                     <Typography
                       variant="body2"
