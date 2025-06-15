@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import { getTheme } from "./theme";
-import ScenarioPlanner from "./scenario-planner";
+import ScenarioComparison from "./CompareScenarios/index";
 
 const theme = getTheme();
 
@@ -9,7 +9,8 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <Box>
-        <ScenarioPlanner />
+        {/* <ScenarioPlanner /> */}
+        <ScenarioComparison />
       </Box>
     </ThemeProvider>
   );
