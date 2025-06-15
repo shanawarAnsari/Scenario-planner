@@ -32,36 +32,6 @@ export const mockScenarios: Scenario[] = [
     },
   },
   {
-    name: "Dummy scenario",
-    kcTotals: {
-      vpk: 2000000,
-      uvpk: 2100000,
-      vpkd_per: 5.0,
-      rb: 15000000,
-      ra: 15500000,
-      rd_per: 3.3,
-      pb: 55000,
-      pa: 57000,
-      pd_per: 3.6,
-      gp_per: 0.5,
-    },
-  },
-  {
-    name: "Holiday Promotion Boost",
-    kcTotals: {
-      vpk: 2100000,
-      uvpk: 2200000,
-      vpkd_per: 4.8,
-      rb: 16000000,
-      ra: 16500000,
-      rd_per: 3.1,
-      pb: 60000,
-      pa: 63000,
-      pd_per: 5.0,
-      gp_per: 0.7,
-    },
-  },
-  {
     name: "New Product Launch",
     kcTotals: {
       vpk: 1750000,
