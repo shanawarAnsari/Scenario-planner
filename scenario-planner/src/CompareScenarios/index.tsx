@@ -16,7 +16,7 @@ const ScenarioComparison: React.FC = () => {
     <Box sx={{ padding: 3, backgroundColor: "#f8fafc", minHeight: "100vh" }}>
       <ComparisonHeader
         title="Detailed comparison"
-        subtitle={`Comparing ${scenariosToCompare.length} solutions`}
+        subtitle={`Comparing ${scenariosToCompare.length} scenarios`}
       />
       <ComparisonTable
         scenarios={scenariosToCompare}
