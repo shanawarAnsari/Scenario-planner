@@ -12,6 +12,14 @@ interface KPIRowProps {
 }
 
 const KPIRow: React.FC<KPIRowProps> = ({ kpi, scenarios, isLast, viewMode }) => {
+  // Calculate dynamic width based on number of scenarios
+  const getColumnWidth = () => {
+    if (scenarios.length <= 4) {
+      return `calc((100% - 180px) / ${scenarios.length})`;
+    }
+    return "300px";
+  };
+
   return (
     <Box
       sx={{
@@ -58,8 +66,8 @@ const KPIRow: React.FC<KPIRowProps> = ({ kpi, scenarios, isLast, viewMode }) => 
           <Box
             key={`${scenario.name}-${kpi.key}`}
             sx={{
-              width: 250, // Fixed width to match header
-              minWidth: 250, // Prevent shrinking
+              width: getColumnWidth(),
+              minWidth: scenarios.length <= 4 ? "200px" : "300px",
               p: 2,
               borderRight:
                 index < scenarios.length - 1 ? "1px solid #e5e7eb" : "none",

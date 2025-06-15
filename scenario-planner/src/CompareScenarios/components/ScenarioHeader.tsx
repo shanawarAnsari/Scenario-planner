@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Typography, Chip, IconButton } from "@mui/material";
-import { MinusOutlined } from "@ant-design/icons";
+import { MinusCircleTwoTone } from "@ant-design/icons";
 import { Scenario } from "../types";
 
 interface ScenarioHeaderProps {
@@ -8,6 +8,7 @@ interface ScenarioHeaderProps {
   index: number;
   isLast: boolean;
   onRemove?: (index: number) => void;
+  totalScenarios: number;
 }
 
 const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
@@ -15,12 +16,24 @@ const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
   index,
   isLast,
   onRemove,
+  totalScenarios,
 }) => {
+  // Calculate dynamic width based on number of scenarios
+  // For 1-4 scenarios, expand to fill space. For 5+, use fixed 300px
+  const getColumnWidth = () => {
+    if (totalScenarios <= 4) {
+      // Calculate available width after left column (180px)
+      // Distribute remaining space equally among scenarios
+      return `calc((100% - 180px) / ${totalScenarios})`;
+    }
+    return "300px"; // Fixed width for 5+ scenarios
+  };
+
   return (
     <Box
       sx={{
-        width: 250, // Fixed width to 250px
-        minWidth: 250, // Prevent shrinking below 250px
+        width: getColumnWidth(),
+        minWidth: totalScenarios <= 4 ? "200px" : "300px",
         p: 2,
         borderRight: !isLast ? "1px solid #e5e7eb" : "none",
         backgroundColor: "#f9fafb",
@@ -39,7 +52,7 @@ const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
           color: "primary.main",
           fontSize: "14px",
           height: "auto",
-          maxWidth: "190px", // Leave space for the minus icon
+          maxWidth: "220px", // Leave space for the minus icon
           "& .MuiChip-label": {
             padding: "4px 8px",
             whiteSpace: "nowrap",
@@ -60,7 +73,7 @@ const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
             },
           }}
         >
-          <MinusOutlined style={{ fontSize: "16px" }} />
+          <MinusCircleTwoTone style={{ fontSize: "16px" }} />
         </IconButton>
       )}
     </Box>

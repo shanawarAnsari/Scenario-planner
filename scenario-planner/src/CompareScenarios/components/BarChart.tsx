@@ -131,8 +131,6 @@ const BarChart: React.FC<BarChartProps> = ({
           borderRadius: 1,
           backgroundColor: isIncrease ? "#f0f9f3" : "#fef2f2",
           border: `1px solid ${isIncrease ? "#d1fae5" : "#fecaca"}`,
-          px: 1, // Reduced horizontal padding
-          ml: "auto", // Right align the chip
         }}
       >
         {" "}

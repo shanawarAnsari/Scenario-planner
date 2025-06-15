@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Box, Typography, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import {
+  Box,
+  Typography,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+} from "@mui/material";
 import { BarChartOutlined, TableOutlined } from "@ant-design/icons";
 import { Scenario, KPI } from "../types";
 import ScenarioHeader from "./ScenarioHeader";
@@ -47,9 +53,11 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
         },
       }}
     >
+      {" "}
       <Box
         sx={{
-          minWidth: 180 + scenarios.length * 250, // Ensure minimum width for all columns
+          width: "100%", // Take full width of container
+          minWidth: 180 + scenarios.length * 300, // Ensure minimum width for all columns
         }}
       >
         {/* Header Row */}
@@ -105,15 +113,18 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
                 },
               }}
             >
-              <ToggleButton value="chart" aria-label="chart view">
-                <BarChartOutlined style={{ fontSize: "16px" }} />
-              </ToggleButton>
-              <ToggleButton value="data" aria-label="data view">
-                <TableOutlined style={{ fontSize: "16px" }} />
-              </ToggleButton>
+              <Tooltip title="Chart View" placement="top">
+                <ToggleButton value="chart" aria-label="chart view">
+                  <BarChartOutlined style={{ fontSize: "16px" }} />
+                </ToggleButton>
+              </Tooltip>
+              <Tooltip title="Data View" placement="top">
+                <ToggleButton value="data" aria-label="data view">
+                  <TableOutlined style={{ fontSize: "16px" }} />
+                </ToggleButton>
+              </Tooltip>
             </ToggleButtonGroup>
           </Box>{" "}
-          {/* Scenario Headers */}
           {scenarios.map((scenario, index) => (
             <ScenarioHeader
               key={scenario.name}
@@ -121,10 +132,11 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
               index={index}
               isLast={index === scenarios.length - 1}
               onRemove={onRemoveScenario}
+              totalScenarios={scenarios.length}
             />
           ))}
         </Box>
-        {/* KPI Rows */}
+
         {kpis.map((kpi, kpiIndex) => (
           <KPIRow
             key={kpi.key}
