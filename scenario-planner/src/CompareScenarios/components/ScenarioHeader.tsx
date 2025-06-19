@@ -18,22 +18,18 @@ const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
   onRemove,
   totalScenarios,
 }) => {
-  // Calculate dynamic width based on number of scenarios
-  // For 1-4 scenarios, expand to fill space. For 5+, use fixed 300px
   const getColumnWidth = () => {
     if (totalScenarios <= 4) {
-      // Calculate available width after left column (180px)
-      // Distribute remaining space equally among scenarios
-      return `calc((100% - 180px) / ${totalScenarios})`;
+      return `calc((100% - 160px) / ${totalScenarios})`;
     }
-    return "300px"; // Fixed width for 5+ scenarios
+    return "240px";
   };
 
   return (
     <Box
       sx={{
         width: getColumnWidth(),
-        minWidth: totalScenarios <= 4 ? "200px" : "300px",
+        minWidth: totalScenarios <= 4 ? "160px" : "240px",
         p: 2,
         borderRight: !isLast ? "1px solid #e5e7eb" : "none",
         backgroundColor: "#f9fafb",
@@ -44,15 +40,15 @@ const ScenarioHeader: React.FC<ScenarioHeaderProps> = ({
       }}
     >
       <Chip
-        label={scenario.name}
+        label={scenario.sn}
         variant="outlined"
         sx={{
           borderRadius: "2px",
-          borderColor: "primary.main",
-          color: "primary.main",
+          borderColor: "#fc48de",
+          color: "#fc48de",
           fontSize: "14px",
           height: "auto",
-          maxWidth: "220px", // Leave space for the minus icon
+          maxWidth: "180px",
           "& .MuiChip-label": {
             padding: "4px 8px",
             whiteSpace: "nowrap",

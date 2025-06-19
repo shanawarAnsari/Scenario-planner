@@ -20,7 +20,7 @@ const BarChart: React.FC<BarChartProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Trigger animation after component mounts
+
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 100);
@@ -28,28 +28,26 @@ const BarChart: React.FC<BarChartProps> = ({
     return () => clearTimeout(timer);
   }, []);
 
-  const maxValue = Math.max(beforeValue, afterValue) * 1.1; // Add 20% buffer for better visibility
+  const maxValue = Math.max(beforeValue, afterValue) * 1.1;
   const beforePercentage = (beforeValue / maxValue) * 100;
   const afterPercentage = (afterValue / maxValue) * 100;
 
   const isIncrease = percentageChange > 0;
   const getColorScheme = () => {
-    if (label.includes("Volume")) return { light: "#e0e7ff", dark: "#3b82f6" };
-    if (label.includes("Revenue")) return { light: "#f3e8ff", dark: "#9333ea" };
-    if (label.includes("Profit")) return { light: "#dcfce7", dark: "#16a34a" };
+    if (label.includes("Volume")) return { light: "#fcd19d", dark: "#ff9412" };;
+    if (label.includes("NSV")) return { light: "#f3e8ff", dark: "#9333ea" };
+    if (label.includes("Profit")) return { light: "#e0e7ff", dark: "#3b82f6" };
     return { light: "#f3f4f6", dark: "#6b7280" };
   };
 
   const colors = getColorScheme();
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
-      {/* Compact Stacked Bar Chart */}
       <Box sx={{ flex: 1 }}>
-        {/* Before Value Bar */}
         <Box
           sx={{
             width: "100%",
-            height: 34,
+            height: 30,
             backgroundColor: "#f8fafc",
             borderRadius: 0.5,
             overflow: "hidden",
@@ -57,24 +55,22 @@ const BarChart: React.FC<BarChartProps> = ({
             position: "relative",
           }}
         >
-          {" "}
           <Box
             sx={{
-              width: isLoaded ? `${Math.max(beforePercentage, 8)}%` : "0%", // Start from 0% and animate to final width
+              width: isLoaded ? `${Math.max(beforePercentage, 8)}%` : "0%",
               height: "100%",
               backgroundColor: colors.light,
-              transition: "width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)", // Exponential easing
+              transition: "width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
               display: "flex",
               alignItems: "center",
               paddingLeft: 0.5,
             }}
           >
-            {" "}
             <Typography
               variant="caption"
               sx={{
                 color: "#4b5563",
-                fontSize: "14px",
+                fontSize: "12px",
                 fontWeight: 600,
               }}
             >
@@ -83,72 +79,45 @@ const BarChart: React.FC<BarChartProps> = ({
           </Box>
         </Box>
 
-        {/* After Value Bar */}
         <Box
           sx={{
-            width: "100%",
-            height: 34,
-            backgroundColor: "#f8fafc",
-            borderRadius: 0.5,
-            overflow: "hidden",
-            position: "relative",
+            width: isLoaded ? `${Math.max(afterPercentage, 8)}%` : "0%",
+            height: "100%",
+            backgroundColor: colors.dark,
+            transition: "width 1.5s cubic-bezier(0.19, 1, 0.22, 1)",
+            display: "flex",
+            alignItems: "center",
+            paddingLeft: 0.5,
           }}
         >
-          {" "}
-          <Box
+          <Typography
+            variant="caption"
             sx={{
-              width: isLoaded ? `${Math.max(afterPercentage, 8)}%` : "0%", // Start from 0% and animate to final width
-              height: "100%",
-              backgroundColor: colors.dark,
-              transition: "width 1.5s cubic-bezier(0.19, 1, 0.22, 1)", // Different exponential easing for variety
-              display: "flex",
-              alignItems: "center",
-              paddingLeft: 0.5,
+              color: "white",
+              fontSize: "12px",
+              fontWeight: 600,
             }}
           >
-            {" "}
-            <Typography
-              variant="caption"
-              sx={{
-                color: "white",
-                fontSize: "14px",
-                fontWeight: 600,
-              }}
-            >
-              {afterValue.toLocaleString()}
-            </Typography>
-          </Box>
+            {afterValue.toLocaleString()}
+          </Typography>
         </Box>
-      </Box>{" "}
-      {/* Percentage Change */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minWidth: "80px",
-          height: "32px",
-          borderRadius: 1,
-          backgroundColor: isIncrease ? "#f0f9f3" : "#fef2f2",
-          border: `1px solid ${isIncrease ? "#d1fae5" : "#fecaca"}`,
-        }}
-      >
-        {" "}
+      </Box>
+      <Box>
         <Typography
           variant="caption"
           sx={{
             color: isIncrease ? "#16a34a" : "#dc2626",
-            fontSize: "13px", // Increased from 11px
+            fontSize: "12px",
             fontWeight: 700,
             display: "flex",
             alignItems: "center",
-            gap: 0.5,
+            gap: 1,
           }}
         >
           {isIncrease ? (
-            <ArrowUpOutlined style={{ fontSize: "12px" }} /> // Increased from 10px
+            <ArrowUpOutlined style={{ fontSize: "12px" }} />
           ) : (
-            <ArrowDownOutlined style={{ fontSize: "12px" }} /> // Increased from 10px
+            <ArrowDownOutlined style={{ fontSize: "12px" }} />
           )}
           {Math.abs(percentageChange).toFixed(1)}%
         </Typography>

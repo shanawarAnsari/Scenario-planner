@@ -9,7 +9,7 @@ interface ComparisonHeaderProps {
 const ComparisonHeader: React.FC<ComparisonHeaderProps> = ({ title, subtitle }) => {
   return (
     <Box sx={{ mb: 4 }}>
-      <Typography variant="h5" fontWeight={600} sx={{ color: "#1f2937", mb: 1 }}>
+      <Typography variant="h6" fontWeight={600} sx={{ color: "#1f2937", mb: 1 }}>
         {title}
       </Typography>
       <Typography variant="body2" sx={{ color: "#6b7280" }}>

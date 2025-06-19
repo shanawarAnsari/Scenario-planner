@@ -7,22 +7,26 @@ import {
   Tooltip,
 } from "@mui/material";
 import { BarChartOutlined, TableOutlined } from "@ant-design/icons";
-import { Scenario, KPI } from "../types";
 import ScenarioHeader from "./ScenarioHeader";
 import KPIRow from "./KPIRow";
+import { KPI } from "../types";
 
 interface ComparisonTableProps {
-  scenarios: Scenario[];
+  scenarios: any[];
   kpis: KPI[];
   onRemoveScenario?: (index: number) => void;
+  viewType: "pack" | "su";
+  onViewTypeChange: (type: "pack" | "su") => void;
 }
 
 const ComparisonTable: React.FC<ComparisonTableProps> = ({
   scenarios,
   kpis,
   onRemoveScenario,
+  viewType,
+  onViewTypeChange,
 }) => {
-  const [viewMode, setViewMode] = useState<"chart" | "data">("chart");
+  const [viewMode, setViewMode] = useState<"chart" | "data">("data");
 
   const handleViewModeChange = (
     event: React.MouseEvent<HTMLElement>,
@@ -30,6 +34,13 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
   ) => {
     if (newViewMode !== null) {
       setViewMode(newViewMode);
+    }
+  };
+  const getKCTotals = (scenario: any) => {
+    if (viewType === "pack") {
+      return scenario.results_pack?.kcTotals || {};
+    } else {
+      return scenario.results_su?.kcTotals || {};
     }
   };
 
@@ -53,16 +64,23 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
         },
       }}
     >
-      {" "}
-      <Box
-        sx={{
-          width: "100%", // Take full width of container
-          minWidth: 180 + scenarios.length * 300, // Ensure minimum width for all columns
-        }}
-      >
-        {/* Header Row */}
+      <Box sx={{ display: "flex", justifyContent: "space-between", p: 2 }}>
+        <Typography variant="subtitle2" fontWeight={600}>
+          Target KPIs
+        </Typography>
+        <ToggleButtonGroup
+          value={viewType}
+          exclusive
+          onChange={(_, newType) => newType && onViewTypeChange(newType)}
+          size="small"
+        >
+          <ToggleButton value="pack">Pack</ToggleButton>
+          <ToggleButton value="su">SU</ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+
+      <Box sx={{ minWidth: 160 + scenarios.length * 240 }}>
         <Box sx={{ display: "flex", borderBottom: "1px solid #e5e7eb" }}>
-          {/* Left Column Header */}
           <Box
             sx={{
               width: 180,
@@ -83,35 +101,13 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
               fontWeight={600}
               sx={{ color: "#374151" }}
             >
-              Target KPIs
+              View Mode
             </Typography>
             <ToggleButtonGroup
               value={viewMode}
               exclusive
               onChange={handleViewModeChange}
               size="small"
-              sx={{
-                height: "28px",
-                "& .MuiToggleButton-root": {
-                  border: "1px solid #d1d5db",
-                  padding: "2px",
-                  minWidth: "36px",
-                  "&.Mui-selected": {
-                    backgroundColor: "#3b82f6",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "#2563eb",
-                    },
-                  },
-                  "&:not(.Mui-selected)": {
-                    backgroundColor: "white",
-                    color: "#6b7280",
-                    "&:hover": {
-                      backgroundColor: "#f3f4f6",
-                    },
-                  },
-                },
-              }}
             >
               <Tooltip title="Chart View" placement="top">
                 <ToggleButton value="chart" aria-label="chart view">
@@ -124,10 +120,11 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
                 </ToggleButton>
               </Tooltip>
             </ToggleButtonGroup>
-          </Box>{" "}
+          </Box>
+
           {scenarios.map((scenario, index) => (
             <ScenarioHeader
-              key={scenario.name}
+              key={scenario.id}
               scenario={scenario}
               index={index}
               isLast={index === scenarios.length - 1}
@@ -141,7 +138,7 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({
           <KPIRow
             key={kpi.key}
             kpi={kpi}
-            scenarios={scenarios}
+            scenarios={scenarios.map(getKCTotals)}
             isLast={kpiIndex === kpis.length - 1}
             viewMode={viewMode}
           />
