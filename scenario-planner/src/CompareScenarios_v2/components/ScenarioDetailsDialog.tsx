@@ -74,7 +74,6 @@ const ScenarioDetailsDialog: React.FC<ScenarioDetailsDialogProps> = ({
             >
               <CardContent sx={{ p: 2.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
-                  <CalendarIcon sx={{ color: "primary.main", mr: 1 }} />
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     Timeline
                   </Typography>
@@ -156,7 +155,6 @@ const ScenarioDetailsDialog: React.FC<ScenarioDetailsDialogProps> = ({
             >
               <CardContent sx={{ p: 2.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
-                  <PersonIcon sx={{ color: "primary.main", mr: 1 }} />
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     Basic Information
                   </Typography>
@@ -246,7 +244,6 @@ const ScenarioDetailsDialog: React.FC<ScenarioDetailsDialogProps> = ({
             >
               <CardContent sx={{ p: 2.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
-                  <InventoryIcon sx={{ color: "primary.main", mr: 1 }} />
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     Product Information
                   </Typography>
