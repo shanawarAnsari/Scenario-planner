@@ -50,13 +50,14 @@ const ScenarioDetailsDialog: React.FC<ScenarioDetailsDialogProps> = ({
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          pb: 1,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, fontSize: "1.25rem" }}>
           {scenario.sn} - Scenario Details
         </Typography>
-        <IconButton onClick={onClose}>
-          <CloseIcon />
+        <IconButton onClick={onClose} size="small">
+          <CloseIcon sx={{ fontSize: "1.2rem" }} />
         </IconButton>
       </DialogTitle>
       <DialogContent>

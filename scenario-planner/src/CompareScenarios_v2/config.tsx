@@ -31,7 +31,7 @@ export const categories: Category[] = [
   },
   {
     key: "profit",
-    label: "Profit Pool",
+    label: "Profit Metrics",
     icon: <PieChart />,
     color: "#8B5CF6",
   },
@@ -76,7 +76,7 @@ export const kpiConfigs: KPIConfig[] = [
   },
   {
     key: "tvol_su",
-    label: "Total Volume in SU",
+    label: "Volume Growth %",
     category: "volume",
     icon: <Assessment />,
     color: "#3B82F6",
@@ -90,7 +90,7 @@ export const kpiConfigs: KPIConfig[] = [
   },
   {
     key: "tvol_su_d_abs",
-    label: "Volume delta abs in SU",
+    label: "Volume Growth (abs)",
     category: "volume",
     icon: <Assessment />,
     color: "#3B82F6",
@@ -371,7 +371,7 @@ export const kpiConfigs: KPIConfig[] = [
   },
   {
     key: "trp_d_abs",
-    label: "Retailer profit delta abs",
+    label: "Retailer Growth (abs)",
     unit: "£",
     isCurrency: true,
     category: "retailer",
@@ -445,7 +445,7 @@ export const kpiConfigs: KPIConfig[] = [
   // Profit Pool Section
   {
     key: "tpp",
-    label: "Total Profit Pool",
+    label: "Total Profit (abs)",
     unit: "£",
     isCurrency: true,
     category: "profit",
@@ -481,7 +481,7 @@ export const kpiConfigs: KPIConfig[] = [
   },
   {
     key: "tkcpp",
-    label: "Total KC Profit Pool",
+    label: "Total KC (abs)",
     unit: "£",
     isCurrency: true,
     category: "profit",
@@ -499,7 +499,7 @@ export const kpiConfigs: KPIConfig[] = [
   },
   {
     key: "tkcpp_d_abs",
-    label: "KC Profit Pool delta abs",
+    label: "KC Growth (abs)",
     unit: "£",
     isCurrency: true,
     category: "profit",
