@@ -6,7 +6,12 @@ import KPICategoryAccordion from "./components/KPICategoryAccordion";
 
 const ScenarioComparison: React.FC = () => {
   const scenarios = scenariosData;
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(["volume"]);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([
+    "volume",
+    "kc",
+    "retailer",
+    "profit",
+  ]);
 
   const handleCategoryChange =
     (category: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {

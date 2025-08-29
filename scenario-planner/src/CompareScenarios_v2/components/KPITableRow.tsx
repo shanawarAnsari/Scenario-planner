@@ -15,7 +15,9 @@ const KPITableRow: React.FC<KPITableRowProps> = ({ config, scenarios }) => {
         "&:hover": { bgcolor: "action.hover" },
       }}
     >
-      <TableCell sx={{ py: 2 }}>
+      <TableCell
+        sx={{ py: 2, width: "250px", minWidth: "250px", maxWidth: "250px" }}
+      >
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Box
             sx={{

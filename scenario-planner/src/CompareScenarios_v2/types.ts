@@ -5,13 +5,13 @@ export interface KPIConfig {
   unit?: string;
   isPercentage?: boolean;
   isCurrency?: boolean;
-  category: "volume" | "financial" | "margin" | "profit";
+  category: "volume" | "kc" | "retailer" | "profit";
   icon: React.ReactElement;
   color: string;
 }
 
 export interface Category {
-  key: "volume" | "financial" | "margin" | "profit";
+  key: "volume" | "kc" | "retailer" | "profit";
   label: string;
   icon: React.ReactElement;
   color: string;

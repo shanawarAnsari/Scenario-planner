@@ -128,7 +128,15 @@ const KPICategoryAccordion: React.FC<KPICategoryAccordionProps> = ({
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600, fontSize: "1rem" }}>
+                  <TableCell
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: "1rem",
+                      width: "50px",
+                      minWidth: "50px",
+                      maxWidth: "50px",
+                    }}
+                  >
                     KPI Metric
                   </TableCell>
                   {limitedScenarios.map((scenario) => (
